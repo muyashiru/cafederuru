@@ -1,69 +1,44 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap");
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply font-body bg-gradient-to-br from-cream via-beige to-cream text-gray-700 antialiased;
+    }
 }
 
-:root {
-    /* Matcha Green Theme */
-    --matcha-primary: #88b04b;
-    --matcha-light: #a8d08d;
-    --matcha-dark: #6b8e3d;
-    --cream: #f5f5dc;
-    --beige: #fff8dc;
-    --soft-pink: #ffb6c1;
-    --peach: #ffdab9;
-    --text-dark: #4a4a4a;
-    --text-charcoal: #333333;
-    --white: #ffffff;
+@layer utilities {
+    .text-gradient-matcha {
+        @apply bg-gradient-to-r from-matcha-light to-matcha-dark bg-clip-text text-transparent;
+    }
 
-    /* Shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
-}
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
+    }
 
-body {
-    font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, var(--cream) 0%, var(--beige) 100%);
-    color: var(--text-dark);
-    min-height: 100vh;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
+    @keyframes float {
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
 
-#root {
-    width: 100%;
-    min-height: 100vh;
-}
+    .animate-bounce-slow {
+        animation: bounce 0.5s ease-in-out infinite alternate;
+    }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--cream);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--matcha-light);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--matcha-primary);
-}
-
-/* Utility Classes */
-.cute-heading {
-    font-family: "Quicksand", sans-serif;
-    font-weight: 700;
-}
-
-.smooth-transition {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    @keyframes bounce {
+        from {
+            transform: translateY(0);
+        }
+        to {
+            transform: translateY(-10px);
+        }
+    }
 }

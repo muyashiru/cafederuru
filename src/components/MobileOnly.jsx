@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import './MobileOnly.css';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 const MobileOnly = ({ children }) => {
   const [isMobile, setIsMobile] = useState(true);
@@ -7,27 +7,54 @@ const MobileOnly = ({ children }) => {
   useEffect(() => {
     const checkIfMobile = () => {
       const userAgent = navigator.userAgent.toLowerCase();
-      const mobileKeywords = ['android', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone'];
-      const isMobileDevice = mobileKeywords.some(keyword => userAgent.includes(keyword));
+      const mobileKeywords = [
+        "android",
+        "iphone",
+        "ipad",
+        "ipod",
+        "blackberry",
+        "windows phone",
+      ];
+      const isMobileDevice = mobileKeywords.some((keyword) =>
+        userAgent.includes(keyword),
+      );
       const isSmallScreen = window.innerWidth <= 768;
 
       setIsMobile(isMobileDevice || isSmallScreen);
     };
 
     checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
+    window.addEventListener("resize", checkIfMobile);
 
-    return () => window.removeEventListener('resize', checkIfMobile);
+    return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
   if (!isMobile) {
     return (
-      <div className="desktop-block">
-        <div className="desktop-block-content">
-          <div className="icon">📱</div>
-          <h2>Mobile Only</h2>
-          <p>This special invitation is designed exclusively for mobile devices.</p>
-          <p className="hint">Please open this link on your phone! 💕</p>
+      <div className="w-full h-screen flex items-center justify-center bg-gradient-to-br from-cream to-beige p-5">
+        <div className="text-center max-w-lg p-10 bg-white rounded-3xl shadow-2xl">
+          <motion.div
+            className="text-7xl md:text-8xl mb-5"
+            animate={{
+              rotate: [0, -10, 10, -10, 10, 0],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            📱
+          </motion.div>
+          <h2 className="font-heading text-3xl md:text-4xl text-matcha-primary mb-4 font-semibold">
+            Mobile Only
+          </h2>
+          <p className="font-body text-base md:text-lg text-gray-700 leading-relaxed mb-3">
+            This special invitation is designed exclusively for mobile devices.
+          </p>
+          <p className="font-body text-lg md:text-xl text-matcha-dark font-semibold">
+            Please open this link on your phone! 💕
+          </p>
         </div>
       </div>
     );

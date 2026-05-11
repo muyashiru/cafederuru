@@ -1,0 +1,69 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap");
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Matcha Green Theme */
+    --matcha-primary: #88b04b;
+    --matcha-light: #a8d08d;
+    --matcha-dark: #6b8e3d;
+    --cream: #f5f5dc;
+    --beige: #fff8dc;
+    --soft-pink: #ffb6c1;
+    --peach: #ffdab9;
+    --text-dark: #4a4a4a;
+    --text-charcoal: #333333;
+    --white: #ffffff;
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, var(--cream) 0%, var(--beige) 100%);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--cream);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--matcha-light);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--matcha-primary);
+}
+
+/* Utility Classes */
+.cute-heading {
+    font-family: "Quicksand", sans-serif;
+    font-weight: 700;
+}
+
+.smooth-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

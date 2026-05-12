@@ -116,6 +116,42 @@ export const uploadFaceImage = async (base64Image, username) => {
 };
 
 /**
+ * Upload voice record to Supabase Storage
+ */
+export const uploadVoiceRecord = async (blob, username) => {
+  try {
+    console.log("🚀 Starting voice upload for:", username);
+    const timestamp = new Date().getTime();
+    const fileName = `voice-${username}-${timestamp}.webm`;
+
+    const { data, error } = await supabase.storage
+      .from("signatures")
+      .upload(fileName, blob, {
+        contentType: blob.type || "audio/webm",
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) throw error;
+
+    const { data: publicUrlData } = supabase.storage
+      .from("signatures")
+      .getPublicUrl(fileName);
+
+    return {
+      success: true,
+      url: publicUrlData.publicUrl,
+    };
+  } catch (error) {
+    console.error("❌ Error uploading voice:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+/**
  * Save RSVP response to database
  * @param {Object} data - RSVP data
  * @param {string} data.username - Selected username from dropdown
@@ -127,7 +163,7 @@ export const uploadFaceImage = async (base64Image, username) => {
  */
 export const saveRSVP = async (data) => {
   try {
-    const { username, loginDate, signatureImage, faceImage, dressCode, customRundown } =
+    const { username, loginDate, signatureImage, faceImage, voiceBlob, dressCode, customRundown } =
       data;
 
     // Validate required fields
@@ -137,6 +173,7 @@ export const saveRSVP = async (data) => {
 
     let signatureUrl = null;
     let faceUrl = null;
+    let voiceUrl = null;
 
     // Upload signature image to storage if provided
     if (signatureImage) {
@@ -159,6 +196,16 @@ export const saveRSVP = async (data) => {
       }
     }
 
+    // Upload voice record if provided
+    if (voiceBlob) {
+      const uploadResult = await uploadVoiceRecord(voiceBlob, username);
+      if (uploadResult.success) {
+        voiceUrl = uploadResult.url;
+      } else {
+        console.warn("Failed to upload voice record");
+      }
+    }
+
     // Prepare data for insert
     const rsvpData = {
       username,
@@ -172,6 +219,11 @@ export const saveRSVP = async (data) => {
     // Add face_image only if we have it (Note: Ensure the DB table has this column!)
     if (faceUrl) {
       rsvpData.face_image = faceUrl;
+    }
+
+    // Add voice_record only if we have it
+    if (voiceUrl) {
+      rsvpData.voice_record = voiceUrl;
     }
 
     // Insert to Supabase

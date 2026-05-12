@@ -16,9 +16,12 @@ const SignaturePage = () => {
   const dataArrayRef = useRef(null);
   const sourceStreamRef = useRef(null);
   const animationFrameRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const voiceChunksRef = useRef([]);
+  const voiceBlobRef = useRef(null);
 
   const [step, setStep] = useState(0); // 0 = Kesel Meter, 1 = Signature, 2 = Face Verification
-  
+
   // States for Kesel Meter
   const [micLevel, setMicLevel] = useState(0);
   const [maxMicLevel, setMaxMicLevel] = useState(0);
@@ -30,9 +33,23 @@ const SignaturePage = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanComplete, setScanComplete] = useState(false);
   const [showJumpscare, setShowJumpscare] = useState(false);
+  const [jumpscareEnded, setJumpscareEnded] = useState(false);
+  const [dbSaved, setDbSaved] = useState(false);
+  const [savedDataResult, setSavedDataResult] = useState(null);
+  const [savedSignatureData, setSavedSignatureData] = useState(null);
   const [error, setError] = useState("");
 
   const { username, loginDate } = location.state || {};
+
+  // Watch for both save complete and audio complete
+  useEffect(() => {
+    if (dbSaved && jumpscareEnded) {
+      localStorage.setItem("username", username);
+      navigate("/details", {
+        state: { username, savedData: savedDataResult },
+      });
+    }
+  }, [dbSaved, jumpscareEnded, navigate, username, savedDataResult]);
 
   useEffect(() => {
     if (!username || !loginDate) {
@@ -92,6 +109,22 @@ const SignaturePage = () => {
       analyserRef.current = analyser;
       dataArrayRef.current = dataArray;
       sourceStreamRef.current = stream;
+
+      // Setup MediaRecorder for capturing audio
+      voiceChunksRef.current = [];
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          voiceChunksRef.current.push(e.data);
+        }
+      };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(voiceChunksRef.current, { type: "audio/webm" });
+        voiceBlobRef.current = blob;
+      };
+      mediaRecorder.start();
+      mediaRecorderRef.current = mediaRecorder;
+
       setIsMicActive(true);
       setMicError("");
 
@@ -102,16 +135,16 @@ const SignaturePage = () => {
           sum += dataArray[i];
         }
         let average = sum / bufferLength;
-        
+
         // --- PENGATURAN SENSITIVITAS ---
         // Suara ruangan biasa/ngobrol normal biasanya punya average 30-50.
         // Teriak kencang biasanya 100-130.
         // Kita abaikan suara di bawah 40, jadi kalau cuma ngomong biasa bar-nya gak naik.
         let adjustedAverage = Math.max(0, average - 40);
-        
+
         // Supaya mentok 100%, adjustedAverage harus mencapai 80 (berarti real average = 120, ini butuh TERIAKAN KERAS).
-        let level = Math.min(100, Math.round((adjustedAverage / 80) * 100)); 
-        
+        let level = Math.min(100, Math.round((adjustedAverage / 80) * 100));
+
         setMicLevel(level);
         setMaxMicLevel(prev => Math.max(prev, level));
 
@@ -127,6 +160,12 @@ const SignaturePage = () => {
 
   const stopMic = () => {
     if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+
+    // Stop recorder first to ensure blob gets created
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+
     if (sourceStreamRef.current) {
       sourceStreamRef.current.getTracks().forEach(track => track.stop());
     }
@@ -153,6 +192,8 @@ const SignaturePage = () => {
       return;
     }
     setError("");
+    // Save the signature data BEFORE changing step, because the canvas will unmount
+    setSavedSignatureData(signatureRef.current.toDataURL());
     setStep(2); // Go to Face Verification
   };
 
@@ -179,6 +220,17 @@ const SignaturePage = () => {
       setScanComplete(true);
       setTimeout(() => {
         setShowJumpscare(true);
+
+        // Play Hachimi globally so it doesn't stop when we change pages!
+        const hachimi = new Audio("/Hachimi%20mr%20biao%20tiktok%20version.mp3");
+        window.hachimiAudio = hachimi;
+        hachimi.play().catch(e => console.error("Hachimi audio playback failed:", e));
+
+        // Fixed jumpscare interval (10 seconds) then navigate
+        setTimeout(() => {
+          setJumpscareEnded(true);
+        }, 10000);
+
         handleFinalSubmit(capturedFace);
       }, 1000);
     }, 3000);
@@ -188,21 +240,18 @@ const SignaturePage = () => {
     setIsSaving(true);
     setError("");
     try {
-      const signatureImage = signatureRef.current?.toDataURL();
+      const signatureImage = savedSignatureData || signatureRef.current?.toDataURL();
       const result = await saveRSVP({
         username,
         loginDate,
         signatureImage,
         faceImage: capturedFace,
+        voiceBlob: voiceBlobRef.current,
       });
 
       if (result.success) {
-        localStorage.setItem("username", username);
-        setTimeout(() => {
-          navigate("/details", {
-            state: { username, savedData: result.data },
-          });
-        }, 3000);
+        setSavedDataResult(result.data);
+        setDbSaved(true);
       } else {
         throw new Error(result.error || "Failed to save data");
       }
@@ -210,6 +259,7 @@ const SignaturePage = () => {
       console.error("Error saving RSVP:", err);
       setError("Gagal menyimpan data. Coba lagi ya! 😢");
       setIsSaving(false);
+      setJumpscareEnded(true); // Don't trap user
     }
   };
 
@@ -229,7 +279,7 @@ const SignaturePage = () => {
   };
 
   if (isSaving && !showJumpscare) {
-    return <TurtleLoader onComplete={() => {}} />;
+    return <TurtleLoader onComplete={() => { }} />;
   }
 
   if (!username) return null;
@@ -272,11 +322,11 @@ const SignaturePage = () => {
             </div>
 
             <div className="w-full h-12 bg-gray-200 rounded-full overflow-hidden relative shadow-inner mb-2 border-2 border-white">
-              <div 
+              <div
                 className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 transition-all duration-75"
                 style={{ width: `${micLevel}%` }}
               ></div>
-              <div 
+              <div
                 className="absolute top-0 left-0 h-full bg-red-500/30 transition-all duration-300 border-r-2 border-red-500"
                 style={{ width: `${maxMicLevel}%` }}
               ></div>
@@ -284,7 +334,7 @@ const SignaturePage = () => {
                 {micLevel}%
               </div>
             </div>
-            
+
             <p className="font-accent text-[10px] text-gray-500 mb-6 uppercase tracking-widest font-bold">
               Rekor: {maxMicLevel}% / 80% (Batas Lanjut)
             </p>
@@ -429,7 +479,7 @@ const SignaturePage = () => {
                 <div className="absolute inset-0 bg-matcha-primary/20 animate-pulse z-10 pointer-events-none"></div>
               )}
               {scanComplete && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="absolute inset-0 bg-white/70 flex items-center justify-center backdrop-blur-sm z-30"
@@ -496,7 +546,7 @@ const SignaturePage = () => {
               src="/WhatsApp%20Image%202026-05-12%20at%2015.44.25.jpeg"
               alt="Jumpscare"
               initial={{ scale: 0.1, opacity: 0 }}
-              animate={{ scale: 1.2, opacity: 1 }}
+              animate={{ scale: 0.8, opacity: 1 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
               className="w-full h-full object-cover"
             />

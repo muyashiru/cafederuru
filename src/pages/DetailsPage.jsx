@@ -140,6 +140,35 @@ const DetailsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
+  // Play Background Music
+  useEffect(() => {
+    const salAudio = new Audio("/Sal%20Priadi%20-%20Besok%20Kita%20Pergi%20Makan%20(Official%20Audio).mp3");
+    salAudio.loop = true;
+    salAudio.volume = 0.6;
+
+    const playSalPriadi = () => {
+      salAudio.play().catch(e => console.log("Autoplay blocked or audio missing:", e));
+    };
+
+    if (window.hachimiAudio && !window.hachimiAudio.ended) {
+      // Tunggu Hachimi selesai dulu
+      window.hachimiAudio.addEventListener('ended', playSalPriadi);
+    } else {
+      // Mainkan Sal Priadi langsung
+      playSalPriadi();
+    }
+
+    return () => {
+      salAudio.pause();
+      salAudio.src = "";
+      if (window.hachimiAudio) {
+        window.hachimiAudio.pause();
+        window.hachimiAudio.src = "";
+        window.hachimiAudio = null;
+      }
+    };
+  }, []);
+
   // Countdown Timer - Target: 14 Mei 2026 jam 07:00
   useEffect(() => {
     const updateCountdown = () => {
@@ -696,6 +725,25 @@ const DetailsPage = () => {
           <p className="font-accent tracking-widest uppercase text-xs font-bold text-beige relative z-10">
             Can't wait to see you there! ☕✨
           </p>
+        </motion.div>
+
+        {/* Unblock Request Button */}
+        <motion.div
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+          className="flex justify-center mt-2 mb-10"
+        >
+          <a
+            href="https://wa.me/6285861237060"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative px-6 py-3 bg-white/50 backdrop-blur-sm border border-red-200 hover:bg-red-50 hover:border-red-300 rounded-full text-red-500 font-body font-bold text-sm shadow-sm transition-all flex items-center gap-2 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-red-100 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 z-0"></div>
+            <span className="relative z-10">Unblock aku please 🥺🙏 click!</span>
+            <span className="relative z-10 text-lg group-hover:animate-bounce">💔</span>
+          </a>
         </motion.div>
 
         {/* Save All Floating Button */}

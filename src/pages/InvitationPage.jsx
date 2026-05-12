@@ -124,7 +124,7 @@ const InvitationPage = () => {
                 variants={itemVariants}
               >
                 <p className="font-heading text-sm font-medium text-matcha-dark">
-                  Hallo seng, how's ur day? 💕
+                  Hawow seng, how's ur day? :)
                 </p>
                 <p className="font-body text-xs text-gray-600 leading-relaxed">
                   We haven't meet for{" "}

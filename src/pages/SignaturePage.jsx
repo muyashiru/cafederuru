@@ -11,22 +11,41 @@ const SignaturePage = () => {
   const signatureRef = useRef(null);
   const videoRef = useRef(null);
 
-  const [step, setStep] = useState(1); // 1 = Signature, 2 = Face Verification
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const dataArrayRef = useRef(null);
+  const sourceStreamRef = useRef(null);
+  const animationFrameRef = useRef(null);
+
+  const [step, setStep] = useState(0); // 0 = Kesel Meter, 1 = Signature, 2 = Face Verification
+  
+  // States for Kesel Meter
+  const [micLevel, setMicLevel] = useState(0);
+  const [maxMicLevel, setMaxMicLevel] = useState(0);
+  const [isMicActive, setIsMicActive] = useState(false);
+  const [micError, setMicError] = useState("");
+
+  // States for Signature & Face
   const [isSaving, setIsSaving] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanComplete, setScanComplete] = useState(false);
   const [showJumpscare, setShowJumpscare] = useState(false);
   const [error, setError] = useState("");
 
-  // Get data from LoginPage
   const { username, loginDate } = location.state || {};
 
-  // Redirect if no data
   useEffect(() => {
     if (!username || !loginDate) {
       navigate("/login");
     }
   }, [username, loginDate, navigate]);
+
+  // Clean up mic on unmount
+  useEffect(() => {
+    return () => {
+      stopMic();
+    };
+  }, []);
 
   // Handle Camera Access for Step 2
   useEffect(() => {
@@ -46,7 +65,6 @@ const SignaturePage = () => {
           setTimeout(() => handleFinalSubmit(), 2000);
         });
     }
-
     return () => {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
@@ -55,6 +73,75 @@ const SignaturePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
+  // ========== KESEL METER LOGIC ==========
+  const startMic = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audioContext = new AudioContext();
+      const analyser = audioContext.createAnalyser();
+      const source = audioContext.createMediaStreamSource(stream);
+
+      analyser.fftSize = 256;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      source.connect(analyser);
+
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+      dataArrayRef.current = dataArray;
+      sourceStreamRef.current = stream;
+      setIsMicActive(true);
+      setMicError("");
+
+      const updateMicLevel = () => {
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          sum += dataArray[i];
+        }
+        let average = sum / bufferLength;
+        
+        // --- PENGATURAN SENSITIVITAS ---
+        // Suara ruangan biasa/ngobrol normal biasanya punya average 30-50.
+        // Teriak kencang biasanya 100-130.
+        // Kita abaikan suara di bawah 40, jadi kalau cuma ngomong biasa bar-nya gak naik.
+        let adjustedAverage = Math.max(0, average - 40);
+        
+        // Supaya mentok 100%, adjustedAverage harus mencapai 80 (berarti real average = 120, ini butuh TERIAKAN KERAS).
+        let level = Math.min(100, Math.round((adjustedAverage / 80) * 100)); 
+        
+        setMicLevel(level);
+        setMaxMicLevel(prev => Math.max(prev, level));
+
+        animationFrameRef.current = requestAnimationFrame(updateMicLevel);
+      };
+
+      updateMicLevel();
+    } catch (err) {
+      console.error("Mic access denied", err);
+      setMicError("Mic tidak dapat diakses! Boleh tolong izinkan mic-nya? 🥺");
+    }
+  };
+
+  const stopMic = () => {
+    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    if (sourceStreamRef.current) {
+      sourceStreamRef.current.getTracks().forEach(track => track.stop());
+    }
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+      audioContextRef.current.close();
+    }
+    setIsMicActive(false);
+  };
+
+  const handleNextFromKesel = () => {
+    stopMic();
+    setStep(1); // Go to Signature
+  };
+
+  // ========== SIGNATURE LOGIC ==========
   const handleClear = () => {
     signatureRef.current?.clear();
     setError("");
@@ -66,16 +153,16 @@ const SignaturePage = () => {
       return;
     }
     setError("");
-    setStep(2); // Proceed to Face Verification
+    setStep(2); // Go to Face Verification
   };
 
+  // ========== FACE VERIFICATION LOGIC ==========
   const captureFace = () => {
     if (videoRef.current) {
       const canvas = document.createElement("canvas");
       canvas.width = videoRef.current.videoWidth;
       canvas.height = videoRef.current.videoHeight;
       const ctx = canvas.getContext("2d");
-      // Mirror the image to match what the user sees
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
       ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
@@ -86,19 +173,12 @@ const SignaturePage = () => {
 
   const handleScan = () => {
     setIsScanning(true);
-    
-    // Simulate 3s scan, capture image at the end
     setTimeout(() => {
       const capturedFace = captureFace();
       setIsScanning(false);
       setScanComplete(true);
-      
-      // Wait 1s so they see the success checkmark
       setTimeout(() => {
-        // Boom! Trigger jumpscare
         setShowJumpscare(true);
-        
-        // Start uploading in the background while jumpscare covers the screen
         handleFinalSubmit(capturedFace);
       }, 1000);
     }, 3000);
@@ -107,10 +187,8 @@ const SignaturePage = () => {
   const handleFinalSubmit = async (capturedFace = null) => {
     setIsSaving(true);
     setError("");
-
     try {
       const signatureImage = signatureRef.current?.toDataURL();
-
       const result = await saveRSVP({
         username,
         loginDate,
@@ -120,13 +198,9 @@ const SignaturePage = () => {
 
       if (result.success) {
         localStorage.setItem("username", username);
-
         setTimeout(() => {
           navigate("/details", {
-            state: {
-              username,
-              savedData: result.data,
-            },
+            state: { username, savedData: result.data },
           });
         }, 3000);
       } else {
@@ -139,32 +213,19 @@ const SignaturePage = () => {
     }
   };
 
-  const handleBegin = () => {
-    setError("");
-  };
+  const handleBegin = () => setError("");
 
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.95, y: 20 },
     visible: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        type: "spring",
-        bounce: 0.4,
-        staggerChildren: 0.1,
-      },
+      opacity: 1, scale: 1, y: 0,
+      transition: { duration: 0.5, type: "spring", bounce: 0.4, staggerChildren: 0.1 },
     },
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: "spring", stiffness: 100 },
-    },
+    visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 100 } },
   };
 
   if (isSaving && !showJumpscare) {
@@ -177,10 +238,7 @@ const SignaturePage = () => {
     <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden bg-cream font-body">
       {/* Background Blobs */}
       <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-matcha-primary rounded-full mix-blend-multiply filter blur-[120px] opacity-30 animate-pulse-soft z-0 pointer-events-none"></div>
-      <div
-        className="fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-beige rounded-full mix-blend-multiply filter blur-[120px] opacity-50 z-0 pointer-events-none"
-        style={{ animationDelay: "1s" }}
-      ></div>
+      <div className="fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-beige rounded-full mix-blend-multiply filter blur-[120px] opacity-50 z-0 pointer-events-none" style={{ animationDelay: "1s" }}></div>
 
       {/* Decorative Floating Elements */}
       <div className="fixed top-10 right-10 flex gap-3 opacity-60 z-0 pointer-events-none">
@@ -198,10 +256,72 @@ const SignaturePage = () => {
         initial="hidden"
         animate="visible"
       >
-        {step === 1 ? (
+        {step === 0 ? (
+          // ================= STEP 0: KESEL METER =================
+          <motion.div variants={itemVariants} className="flex flex-col items-center">
+            <div className="text-center mb-6">
+              <div className="inline-block p-2 bg-red-50 rounded-xl mb-3 border border-red-100 -rotate-3">
+                <span className="text-2xl">😤</span>
+              </div>
+              <h1 className="font-heading text-2xl sm:text-3xl text-matcha-dark font-bold mb-2">
+                Seberapa Kesel Kamu?
+              </h1>
+              <p className="font-body text-xs sm:text-sm text-gray-600">
+                Lampiaskan kekesalanmu di sini! Teriak di depan HP sampai bar-nya merah! 🤬
+              </p>
+            </div>
+
+            <div className="w-full h-12 bg-gray-200 rounded-full overflow-hidden relative shadow-inner mb-2 border-2 border-white">
+              <div 
+                className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 transition-all duration-75"
+                style={{ width: `${micLevel}%` }}
+              ></div>
+              <div 
+                className="absolute top-0 left-0 h-full bg-red-500/30 transition-all duration-300 border-r-2 border-red-500"
+                style={{ width: `${maxMicLevel}%` }}
+              ></div>
+              <div className="absolute inset-0 flex items-center justify-center font-bold text-gray-800 drop-shadow-md z-10 text-sm">
+                {micLevel}%
+              </div>
+            </div>
+            
+            <p className="font-accent text-[10px] text-gray-500 mb-6 uppercase tracking-widest font-bold">
+              Rekor: {maxMicLevel}% / 80% (Batas Lanjut)
+            </p>
+
+            {micError && (
+              <p className="text-xs text-red-500 mb-4">{micError}</p>
+            )}
+
+            {!isMicActive ? (
+              <motion.button
+                onClick={startMic}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full py-3 px-4 bg-red-500 text-white font-bold text-sm rounded-xl shadow-md hover:bg-red-600 transition-all font-body"
+              >
+                Aktifkan Mic & Mulai Teriak! 🎙️
+              </motion.button>
+            ) : maxMicLevel >= 80 ? (
+              <motion.button
+                onClick={handleNextFromKesel}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full py-3 px-4 bg-matcha-primary text-white font-bold text-sm rounded-xl shadow-md hover:bg-matcha-dark transition-all font-body animate-pulse-soft"
+              >
+                Udah Puas? Lanjut! 👉
+              </motion.button>
+            ) : (
+              <p className="font-accent text-xs font-bold text-red-500 animate-pulse tracking-widest uppercase">
+                Kurang Kenceng!!! AAAAA!!!
+              </p>
+            )}
+          </motion.div>
+        ) : step === 1 ? (
           // ================= STEP 1: SIGNATURE =================
           <>
-            {/* Header */}
             <motion.div className="text-center mb-6" variants={itemVariants}>
               <div className="inline-block p-2 bg-beige/30 rounded-xl mb-3 border border-beige/50 -rotate-3">
                 <span className="text-2xl">📝</span>
@@ -214,14 +334,11 @@ const SignaturePage = () => {
               </p>
             </motion.div>
 
-            {/* Signature Canvas */}
             <motion.div className="mb-6" variants={itemVariants}>
               <div className="border-2 border-dashed border-matcha-primary/30 rounded-2xl overflow-hidden bg-white/80 shadow-inner relative group transition-colors hover:border-matcha-primary/60">
                 <SignatureCanvas
                   ref={signatureRef}
-                  canvasProps={{
-                    className: "w-full h-48 cursor-crosshair",
-                  }}
+                  canvasProps={{ className: "w-full h-48 cursor-crosshair" }}
                   onBegin={handleBegin}
                   backgroundColor="transparent"
                   penColor="#546B41"
@@ -235,7 +352,6 @@ const SignaturePage = () => {
               </p>
             </motion.div>
 
-            {/* Error Message */}
             <AnimatePresence>
               {error && (
                 <motion.div
@@ -249,34 +365,19 @@ const SignaturePage = () => {
               )}
             </AnimatePresence>
 
-            {/* Info Card */}
-            <motion.div
-              className="bg-white/40 rounded-xl p-4 mb-6 border border-white/60 shadow-sm"
-              variants={itemVariants}
-            >
+            <motion.div className="bg-white/40 rounded-xl p-4 mb-6 border border-white/60 shadow-sm" variants={itemVariants}>
               <div className="flex justify-between items-center mb-2 pb-2 border-b border-white/50">
-                <span className="font-accent text-[10px] uppercase tracking-wider text-matcha-primary font-bold">
-                  Nama
-                </span>
-                <span className="font-heading font-bold text-matcha-dark text-sm">
-                  {username}
-                </span>
+                <span className="font-accent text-[10px] uppercase tracking-wider text-matcha-primary font-bold">Nama</span>
+                <span className="font-heading font-bold text-matcha-dark text-sm">{username}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="font-accent text-[10px] uppercase tracking-wider text-matcha-primary font-bold">
-                  Tanggal
-                </span>
+                <span className="font-accent text-[10px] uppercase tracking-wider text-matcha-primary font-bold">Tanggal</span>
                 <span className="font-body font-medium text-gray-700 text-xs">
-                  {new Date(loginDate).toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
+                  {new Date(loginDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
                 </span>
               </div>
             </motion.div>
 
-            {/* Buttons */}
             <motion.div className="flex gap-3" variants={itemVariants}>
               <motion.button
                 onClick={handleClear}
@@ -305,13 +406,10 @@ const SignaturePage = () => {
                 Face Verification
               </h1>
               <p className="font-body text-xs sm:text-sm text-gray-600">
-                {scanComplete
-                  ? "Verifikasi Berhasil! 100% Valid ✨"
-                  : "Posisikan wajah cantikmu di kamera 📸"}
+                {scanComplete ? "Verifikasi Berhasil! 100% Valid ✨" : "Posisikan wajah cantikmu di kamera 📸"}
               </p>
             </div>
 
-            {/* Camera View */}
             <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full overflow-hidden border-4 border-white shadow-glass mb-8 bg-black/5">
               <video
                 ref={videoRef}
@@ -320,8 +418,6 @@ const SignaturePage = () => {
                 muted
                 className="w-full h-full object-cover scale-x-[-1]"
               />
-
-              {/* Scanning Animation Line */}
               {isScanning && (
                 <motion.div
                   className="absolute left-0 w-full h-1.5 bg-matcha-primary shadow-[0_0_20px_rgba(153,173,122,1)] z-20"
@@ -329,13 +425,9 @@ const SignaturePage = () => {
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                 />
               )}
-
-              {/* Scanning Glow */}
               {isScanning && (
                 <div className="absolute inset-0 bg-matcha-primary/20 animate-pulse z-10 pointer-events-none"></div>
               )}
-
-              {/* Success Overlay */}
               {scanComplete && (
                 <motion.div 
                   initial={{ opacity: 0 }}
@@ -354,7 +446,6 @@ const SignaturePage = () => {
               )}
             </div>
 
-            {/* Error Message */}
             <AnimatePresence>
               {error && (
                 <motion.div
@@ -368,7 +459,6 @@ const SignaturePage = () => {
               )}
             </AnimatePresence>
 
-        {/* Action Buttons */}
             {!isScanning && !scanComplete && !error && (
               <motion.button
                 onClick={handleScan}
@@ -385,7 +475,6 @@ const SignaturePage = () => {
                 Scanning facial features...
               </p>
             )}
-            
             {scanComplete && !showJumpscare && (
               <p className="font-accent text-xs font-bold text-matcha-primary tracking-widest uppercase">
                 Identity Confirmed 💖

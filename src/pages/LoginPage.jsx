@@ -107,7 +107,7 @@ const LoginPage = () => {
         {/* Header - Compact */}
         <motion.div className="text-center mb-4" variants={itemVariants}>
           <h1 className="font-heading text-2xl text-matcha-primary font-semibold mb-1">
-            Welcome Back! 💚
+            Siapa nih yang login?🤔
           </h1>
           <p className="font-body text-xs text-gray-600">
             Isi form di bawah ya buat lanjut~
@@ -228,14 +228,6 @@ const LoginPage = () => {
             Login 🚀
           </motion.button>
         </motion.form>
-
-        {/* Hint */}
-        <motion.p
-          className="text-center text-[10px] text-matcha-dark italic opacity-80 mt-3"
-          variants={itemVariants}
-        >
-          *Psst... semua nama benar kok, yang penting tanggalnya! 😉
-        </motion.p>
       </motion.div>
 
       {/* Decorative Bottom */}

@@ -346,7 +346,7 @@ const DetailsPage = () => {
           className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 mb-6 shadow-lg border-2 border-matcha-light"
         >
           <h2 className="font-lora text-xl sm:text-2xl font-bold text-matcha-dark mb-4 text-center">
-            🎁 Benefits Datang ke Cafe de RURU
+            🎁 Benefits Datang ke <br></br> Cafe de RURU
           </h2>
           <div className="space-y-4">
             {BENEFITS.map((category, catIndex) => (
@@ -497,7 +497,7 @@ const DetailsPage = () => {
             👗 Dress Code
           </h2>
           <p className="font-inter text-xs sm:text-sm text-gray-600 text-center mb-4">
-            Mau pakai warna apa hari itu? (Casual & comfy aja ya! ✨)
+            Mau pakai warna apa nanti?
           </p>
 
           <div className="flex gap-2">
@@ -602,13 +602,8 @@ const DetailsPage = () => {
               Kenapa Acara Ini Diadakan?
             </h3>
             <p className="font-inter text-xs sm:text-sm text-gray-700 leading-relaxed">
-              Jadi ceritanya ini dadakan banget... Pas lagi tiduran di masjid
-              abis shalat dzuhur, tiba-tiba kepikiran:{" "}
-              <em>
-                "Eh, udah lama nggak quality time sambil produktif bareng."
-              </em>{" "}
-              Terus langsung bikin website ini deh (yes, I'm extra like that
-              😅).
+              Tujuan acara ini diadakan untuk mengisi wishlist kita untuk bisa
+              Nuggas bareng lagi dan main ke cafe hijau hijau dan juga matcha :P
             </p>
           </div>
 
@@ -620,9 +615,9 @@ const DetailsPage = () => {
               {[
                 {
                   icon: "✅",
-                  text: "Progress Tugas (kita sama-sama produktif!)",
+                  text: "Ngerjain Tugas (Harus ada progress)",
                 },
-                { icon: "💚", text: "Quality Time (catch up & ngobrol)" },
+                { icon: "🕑", text: "Quality Time (catch up & ngobrol)" },
                 { icon: "📸", text: "Create Memories (foto-foto aesthetic)" },
                 {
                   icon: "☕",

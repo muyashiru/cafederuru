@@ -1,36 +1,38 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const GoodbyePage = () => {
+  const [countdown, setCountdown] = useState(10);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (countdown <= 0) {
+      navigate("/blank", { replace: true });
+      return;
+    }
+    const timer = setTimeout(() => {
+      setCountdown((c) => c - 1);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [countdown, navigate]);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-300 to-gray-100 p-5">
+    <div className="h-screen w-screen bg-black flex flex-col items-center justify-center p-4">
       <motion.div
-        className="text-center p-12 md:p-16 bg-white rounded-3xl shadow-xl max-w-md w-full"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-center"
       >
-        <motion.div
-          className="text-7xl md:text-8xl mb-6 grayscale-[20%]"
-          animate={{
-            y: [0, -10, 0],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        >
-          💔
-        </motion.div>
-        <h1 className="font-heading text-4xl md:text-5xl text-gray-500 mb-4 font-medium">
-          Oh...
+        <h1 className="text-red-500 font-mono text-2xl md:text-4xl mb-6 font-bold uppercase tracking-widest animate-pulse">
+          Goodbye :D
         </h1>
-        <p className="font-body text-xl md:text-2xl text-gray-600 mb-2 font-medium">
-          Okay then.
+        <p className="text-white font-mono text-lg md:text-xl mb-8">
+          Website akan dihapus...
         </p>
-        <p className="font-body text-sm md:text-base text-gray-400 italic">
-          I understand.
-        </p>
+        <div className="text-6xl md:text-8xl font-mono text-red-600 font-bold">
+          {countdown}
+        </div>
       </motion.div>
     </div>
   );

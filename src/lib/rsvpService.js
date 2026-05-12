@@ -1,6 +1,77 @@
 import { supabase } from "./supabase";
 
 /**
+ * Upload signature image to Supabase Storage
+ * @param {string} base64Image - Base64 encoded image
+ * @param {string} username - Username for file naming
+ * @returns {Object} Result with success status and image URL
+ */
+export const uploadSignatureImage = async (base64Image, username) => {
+  try {
+    console.log("🚀 Starting signature upload for:", username);
+
+    // Convert base64 to blob
+    const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, "");
+    const byteCharacters = atob(base64Data);
+    const byteArrays = [];
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteArrays.push(byteCharacters.charCodeAt(i));
+    }
+
+    const blob = new Blob([new Uint8Array(byteArrays)], { type: "image/png" });
+    console.log("✅ Blob created, size:", blob.size, "bytes");
+
+    // Generate unique filename
+    const timestamp = new Date().getTime();
+    const fileName = `${username}-${timestamp}.png`;
+    const filePath = `${fileName}`; // Direct path, no subfolder
+
+    console.log("📁 Uploading to path:", filePath);
+
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from("signatures")
+      .upload(filePath, blob, {
+        contentType: "image/png",
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) {
+      console.error("❌ Upload error:", error);
+      throw error;
+    }
+
+    console.log("✅ Upload success:", data);
+
+    // Get public URL
+    const { data: publicUrlData } = supabase.storage
+      .from("signatures")
+      .getPublicUrl(filePath);
+
+    console.log("✅ Public URL:", publicUrlData.publicUrl);
+
+    return {
+      success: true,
+      url: publicUrlData.publicUrl,
+      path: filePath,
+    };
+  } catch (error) {
+    console.error("❌ Error uploading signature:", error);
+    console.error("Error details:", {
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+    });
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+/**
  * Save RSVP response to database
  * @param {Object} data - RSVP data
  * @param {string} data.username - Selected username from dropdown
@@ -20,12 +91,25 @@ export const saveRSVP = async (data) => {
       throw new Error("Username and login date are required");
     }
 
+    let signatureUrl = null;
+
+    // Upload signature image to storage if provided
+    if (signatureImage) {
+      const uploadResult = await uploadSignatureImage(signatureImage, username);
+      if (uploadResult.success) {
+        signatureUrl = uploadResult.url;
+      } else {
+        console.warn("Failed to upload signature, saving base64 instead");
+        signatureUrl = signatureImage; // Fallback to base64
+      }
+    }
+
     // Prepare data for insert
     const rsvpData = {
       username,
       login_date: loginDate,
       response: "yes", // Always 'yes' because they reached this point
-      signature_image: signatureImage || null,
+      signature_image: signatureUrl,
       dress_code: dressCode || null,
       custom_rundown: customRundown || null,
     };
@@ -229,5 +313,46 @@ export const updateEventDate = async (username, eventDate) => {
       success: false,
       error: error.message,
     };
+  }
+};
+
+/**
+ * Save rejection response to database
+ * @returns {Object} Result with success status
+ */
+export const saveRejection = async () => {
+  try {
+    const rsvpData = {
+      username: "Rejected",
+      login_date: new Date().toISOString().split('T')[0],
+      response: "no",
+    };
+    const { error } = await supabase.from("rsvp_responses").insert([rsvpData]);
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error("Error saving rejection:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Check if there is any response in the database
+ * @returns {Object} Object indicating if answer exists and its type
+ */
+export const checkHasAnswer = async () => {
+  try {
+    const { data, error } = await supabase
+      .from("rsvp_responses")
+      .select("response")
+      .limit(1);
+    if (error) throw error;
+    return { 
+      hasAnswer: data && data.length > 0, 
+      response: data && data.length > 0 ? data[0].response : null 
+    };
+  } catch (error) {
+    console.error("Error checking answer:", error);
+    return { hasAnswer: false };
   }
 };

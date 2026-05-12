@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import TurtleLoader from "../components/TurtleLoader";
+import { saveRejection } from "../lib/rsvpService";
 
 const InvitationPage = () => {
   const navigate = useNavigate();
   const [minutesSinceLastMeet, setMinutesSinceLastMeet] = useState(0);
   const [secondsSinceLastMeet, setSecondsSinceLastMeet] = useState(0);
   const [showLoading, setShowLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const calculateTime = () => {
@@ -33,8 +35,10 @@ const InvitationPage = () => {
     navigate("/login");
   };
 
-  const handleNoClick = () => {
-    navigate("/goodbye");
+  const handleNoClick = async () => {
+    setIsDeleting(true);
+    await saveRejection();
+    navigate("/goodbye", { replace: true });
   };
 
   const containerVariants = {
@@ -139,7 +143,7 @@ const InvitationPage = () => {
                 </p>
                 <p className="font-body text-xs text-gray-600 leading-relaxed">
                   I still remember that you wish we had a study date at Cafe de
-                  RURU, so...
+                  RURU, so... shall we? :D
                 </p>
               </motion.div>
 
@@ -149,7 +153,7 @@ const InvitationPage = () => {
                 variants={itemVariants}
               >
                 <h2 className="font-heading text-sm text-matcha-dark font-medium leading-relaxed">
-                  Will you attend this special date at Cafe de RURU? ☕✨
+                  Will you attend this special date at Cafe de RURU on 14 April? ☕✨
                 </h2>
               </motion.div>
 
@@ -169,11 +173,12 @@ const InvitationPage = () => {
 
                 <motion.button
                   onClick={handleNoClick}
+                  disabled={isDeleting}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
-                  className="w-full py-3 px-6 bg-gradient-to-r from-softpink to-peach text-gray-800 font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-body tracking-wide"
+                  className="w-full py-3 px-6 bg-gradient-to-r from-softpink to-peach text-gray-800 font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-body tracking-wide disabled:opacity-50"
                 >
-                  No, Thank You 💔
+                  {isDeleting ? "Processing..." : "No, Thank You 💔"}
                 </motion.button>
               </motion.div>
             </motion.div>

@@ -207,7 +207,7 @@ const SignaturePage = () => {
           className="text-center text-[10px] text-matcha-dark italic opacity-80 mt-3"
           variants={itemVariants}
         >
-          Data akan tersimpan dengan aman di database ✅
+          Tanda tangan akan disimpan sebagai gambar di Supabase Storage 💾
         </motion.p>
       </motion.div>
 

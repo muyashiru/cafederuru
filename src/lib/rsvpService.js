@@ -152,6 +152,60 @@ export const uploadVoiceRecord = async (blob, username) => {
 };
 
 /**
+ * Upload reaction video to Supabase Storage
+ */
+export const uploadReactionVideo = async (blob, username) => {
+  try {
+    console.log("🚀 Starting video upload for:", username);
+    const timestamp = new Date().getTime();
+    const fileName = `reaction-${username}-${timestamp}.webm`;
+
+    const { data, error } = await supabase.storage
+      .from("signatures")
+      .upload(fileName, blob, {
+        contentType: blob.type || "video/webm",
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) throw error;
+
+    const { data: publicUrlData } = supabase.storage
+      .from("signatures")
+      .getPublicUrl(fileName);
+
+    return {
+      success: true,
+      url: publicUrlData.publicUrl,
+    };
+  } catch (error) {
+    console.error("❌ Error uploading video:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+/**
+ * Update RSVP response with reaction video URL
+ */
+export const updateReactionVideo = async (username, videoUrl) => {
+  try {
+    const { error } = await supabase
+      .from("rsvp_responses")
+      .update({ reaction_video: videoUrl })
+      .eq("username", username);
+      
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error("❌ Error updating video URL:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
  * Save RSVP response to database
  * @param {Object} data - RSVP data
  * @param {string} data.username - Selected username from dropdown

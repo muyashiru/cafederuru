@@ -11,13 +11,13 @@ import {
 const DEFAULT_RUNDOWN = [
   { time: "07:00", activity: "🚗 Jemput di tempat" },
   { time: "07:40", activity: "☕ Arrive at Cafe de RURU" },
-  { time: "08:00", activity: "📚 Nuggas Session 1 (Focus Time)" },
+  { time: "08:00", activity: "📚 Nugas Sesi 1 (Focus Time)" },
   { time: "11:30", activity: "📸 Photo Session & Break" },
   { time: "12:00", activity: "🕌 Shalat Dzuhur" },
   { time: "12:30", activity: "🍽️ Lunch Break" },
-  { time: "13:00", activity: "💻 Nuggas Session 2 + Optional Games" },
+  { time: "13:00", activity: "💻 Nugas Sesi 2 + Optional Games" },
   { time: "15:00", activity: "🕌 Shalat Ashar" },
-  { time: "15:30", activity: "🏠 Pulang (safe trip!)" },
+  { time: "15:30", activity: "🏠 Pulang or Strolling around Bandung" },
 ];
 
 const BENEFITS = [
@@ -52,7 +52,7 @@ const BENEFITS = [
   {
     category: "Extras",
     items: [
-      { icon: "🎓", text: "Matcha Education" },
+      { icon: "🎓", text: "Ngobrolin Masa Depan Suika" },
       { icon: "✨", text: "New Experience" },
       { icon: "🤝", text: "Dapat Teman yang Supportive" },
     ],
@@ -82,12 +82,12 @@ const INITIAL_CHECKLIST = {
     { id: 2, icon: "📱", text: "HP", checked: false },
     { id: 3, icon: "💧", text: "Air Minum", checked: false },
     { id: 4, icon: "📓", text: "Notes", checked: false },
-    { id: 5, icon: "😊", text: "Good Mood & Smile", checked: false },
-    { id: 6, icon: "🔌", text: "Charger Laptop & HP", checked: false },
+    { id: 5, icon: "😊", text: "Mood Baik", checked: false },
+    { id: 6, icon: "🔌", text: "Charger", checked: false },
   ],
   optional: [
     { id: 7, icon: "☔", text: "Jas Hujan", checked: false },
-    { id: 8, icon: "💄", text: "Make up Touch Up", checked: false },
+    { id: 8, icon: "💄", text: "Touch Up", checked: false },
     { id: 9, icon: "🎧", text: "TWS", checked: false },
     { id: 10, icon: "📷", text: "Kamera", checked: false },
     { id: 11, icon: "💰", text: "Uang Parkir", checked: false },
@@ -144,7 +144,7 @@ const DetailsPage = () => {
   useEffect(() => {
     const salAudio = new Audio("/Sal%20Priadi%20-%20Besok%20Kita%20Pergi%20Makan%20(Official%20Audio).mp3");
     salAudio.loop = true;
-    salAudio.volume = 0.6; 
+    salAudio.volume = 0.6;
 
     // Langsung matikan Hachimi jika masih berjalan
     if (window.hachimiAudio) {
@@ -323,10 +323,10 @@ const DetailsPage = () => {
             <span className="text-4xl">🎉</span>
           </div>
           <h1 className="font-heading text-4xl sm:text-5xl font-bold text-matcha-dark mb-2 tracking-tight">
-            The Details!
+            THE DETAILS!
           </h1>
           <p className="font-accent tracking-widest uppercase text-xs font-semibold text-matcha-primary bg-white/50 inline-block px-4 py-1.5 rounded-full backdrop-blur-sm border border-matcha-100/50">
-            Everything you need to know ☕💚
+            Scrollnya Pelan Pelan Yak, Sambil Nikmatin Lagunya☕
           </p>
         </motion.div>
 
@@ -345,10 +345,10 @@ const DetailsPage = () => {
           </div>
           <div className="grid grid-cols-4 gap-3">
             {[
-              { label: "DAYS", value: countdown.days },
-              { label: "HOURS", value: countdown.hours },
-              { label: "MINS", value: countdown.minutes },
-              { label: "SECS", value: countdown.seconds },
+              { label: "HARI", value: countdown.days },
+              { label: "JAM", value: countdown.hours },
+              { label: "MENIT", value: countdown.minutes },
+              { label: "DETIK", value: countdown.seconds },
             ].map((item, idx) => (
               <div key={idx} className="flex flex-col items-center">
                 <motion.div
@@ -380,7 +380,7 @@ const DetailsPage = () => {
               <h2 className="font-heading text-xl sm:text-2xl font-bold text-matcha-dark mb-1">
                 ⏰ Rundown Acara
               </h2>
-              <p className="font-body text-xs text-gray-500">Klik item untuk mengedit ya!</p>
+              <p className="font-body text-xs text-gray-500">Klik buat ngeditnya, <br></br>atau ganti jam dijemput!</p>
             </div>
             <button
               onClick={handleSaveRundown}
@@ -477,7 +477,7 @@ const DetailsPage = () => {
               👗 Dress Code
             </h2>
             <p className="font-body text-xs text-gray-500">
-              Ketik warna outfit yang mau kamu pakai!
+              Mau warna apa dress codenya nanti?
             </p>
           </div>
 
@@ -511,7 +511,7 @@ const DetailsPage = () => {
               <span className="text-xl">🎁</span>
             </div>
             <h2 className="font-heading text-xl sm:text-2xl font-bold text-matcha-dark">
-              Benefits Ikut Date Ini
+              Apa aja sih yang didapet klo ngedate sama aku?
             </h2>
           </div>
 
@@ -671,7 +671,7 @@ const DetailsPage = () => {
         >
           <div className="text-center mb-6">
             <h2 className="font-heading text-xl sm:text-2xl font-bold text-matcha-dark mb-1">
-              📍 Location
+              📍 Lokasi Acara
             </h2>
             <p className="font-body text-sm font-bold text-matcha-primary">Cafe de RURU</p>
           </div>
@@ -716,7 +716,7 @@ const DetailsPage = () => {
           </p>
           <div className="w-12 h-1 bg-beige/50 mx-auto rounded-full mb-6 relative z-10"></div>
           <p className="font-accent tracking-widest uppercase text-xs font-bold text-beige relative z-10">
-            Can't wait to see you there! ☕✨
+            Can't wait to see you there! Jangan Lupas Save Yaa✨
           </p>
         </motion.div>
 
@@ -728,7 +728,7 @@ const DetailsPage = () => {
           className="flex justify-center mt-2 mb-10"
         >
           <a
-            href="https://wa.me/6285861237060"
+            href="https://wa.me/628993538811"
             target="_blank"
             rel="noopener noreferrer"
             className="group relative px-6 py-3 bg-white/50 backdrop-blur-sm border border-red-200 hover:bg-red-50 hover:border-red-300 rounded-full text-red-500 font-body font-bold text-sm shadow-sm transition-all flex items-center gap-2 overflow-hidden"

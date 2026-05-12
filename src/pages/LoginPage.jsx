@@ -21,6 +21,31 @@ const LoginPage = () => {
     { value: "nasywa3", label: "Dr. Nasywa Fauziyyah, S.Pd., M.Ars" },
     { value: "nasywa4", label: "Nasywa Tercantik Sedunia" },
     { value: "nasywa5", label: "Calon Ibu Rumah Tangga Idaman" },
+    { value: "nasywa6", label: "Nasywa Yang Selalu Benar" },
+    { value: "nasywa7", label: "Nasywa Sibuk" },
+    { value: "nasywa8", label: "Nasywa Instruktur Senam" },
+    { value: "nasywa9", label: "Nasywa Nyebelin" },
+    { value: "nasywa10", label: "Nasywa Yang Gampang Laper" },
+    { value: "nasywa11", label: "Nasywa Mode Hemat Baterai" },
+    { value: "nasywa12", label: "Nasywa Sang Pemilik Hati" },
+    { value: "nasywa13", label: "Nasywa Kicau Mania" },
+    { value: "nasywa14", label: "My Future Wife" },
+    { value: "nasywa15", label: "Nasywa Calon Menteri Keuangan" },
+    { value: "nasywa16", label: "Nasywa HMTB" },
+    { value: "nasywa17", label: "Nasywa Racing" },
+    { value: "nasywa18", label: "Nasywa Fomo" },
+    { value: "nasywa19", label: "Nasywa Anak Senja" },
+    { value: "nasywa20", label: "Nasywa Nokturnal" },
+    { value: "nasywa21", label: "Nasywa Si Paling Gemas" },
+    { value: "nasywa22", label: "Nasywa Yang Sering Lupa" },
+    { value: "nasywa23", label: "Nasywa Si Tukang Overthinking" },
+    { value: "nasywa24", label: "Nasywa Arsitek Masa Depan" },
+    { value: "nasywa25", label: "Nasywa Si Paling Wangi" },
+    { value: "nasywa26", label: "Nasywa Pencinta Anak Kucing" },
+    { value: "nasywa27", label: "Nasywa Telkomsel" },
+    { value: "nasywa28", label: "Nasywa Si Paling Sabar" },
+    { value: "nasywa29", label: "Nasywa Tukang Tidur Siang" },
+    { value: "nasywa30", label: "Kangen seng :(" },
   ];
 
   const handleLogin = (e) => {
@@ -34,7 +59,7 @@ const LoginPage = () => {
     }
 
     if (!selectedDate) {
-      setErrorMessage("Inget dong kapan terakhir kita ketemu! 🤔");
+      setErrorMessage("Ga inget kapan terakhir kita ketemu seng? 🤔");
       triggerShake();
       return;
     }
@@ -93,9 +118,8 @@ const LoginPage = () => {
       <div className="absolute bottom-1/4 left-8 opacity-50 animate-float-delayed z-0 text-3xl">💕</div>
 
       <motion.div
-        className={`max-w-[380px] w-full glass-panel px-6 py-8 relative z-10 ${
-          isShaking ? "animate-[shake_0.5s_ease-in-out]" : ""
-        }`}
+        className={`max-w-[380px] w-full glass-panel px-6 py-8 relative z-10 ${isShaking ? "animate-[shake_0.5s_ease-in-out]" : ""
+          }`}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -103,13 +127,13 @@ const LoginPage = () => {
         {/* Header */}
         <motion.div className="text-center mb-6" variants={itemVariants}>
           <div className="w-16 h-16 mx-auto mb-3 bg-white/50 rounded-full flex items-center justify-center border border-white shadow-sm">
-             <span className="text-3xl">🕵🏻‍♀️</span>
+            <span className="text-3xl">🕵🏻‍♀️</span>
           </div>
           <h1 className="font-heading text-2xl text-matcha-dark font-bold mb-1">
             Siapa nih yang login?
           </h1>
           <p className="font-body text-xs text-gray-500 font-medium tracking-wide">
-            VERIFICATION REQUIRED ✨
+            PILIH YANG PALING SESUAI ✨
           </p>
         </motion.div>
 
@@ -139,14 +163,13 @@ const LoginPage = () => {
                   </span>
                 </Listbox.Button>
                 <AnimatePresence>
-                  <Listbox.Options className="absolute z-20 w-full mt-2 bg-white/90 backdrop-blur-xl border border-white shadow-xl rounded-2xl max-h-60 overflow-auto focus:outline-none hide-scrollbar">
+                  <Listbox.Options className="absolute z-20 w-full mt-2 bg-white/90 backdrop-blur-xl border border-white shadow-xl rounded-2xl max-h-60 overflow-auto focus:outline-none">
                     {usernameOptions.map((option, idx) => (
                       <Listbox.Option
                         key={option.value}
                         value={option}
                         className={({ active }) =>
-                          `cursor-pointer select-none relative py-3 px-4 text-sm transition-colors border-b border-gray-100 last:border-0 ${
-                            active ? "bg-matcha-50 text-matcha-dark" : "text-gray-700 hover:bg-gray-50"
+                          `cursor-pointer select-none relative py-3 px-4 text-sm transition-colors border-b border-gray-100 last:border-0 ${active ? "bg-matcha-50 text-matcha-dark" : "text-gray-700 hover:bg-gray-50"
                           }`
                         }
                       >
@@ -207,7 +230,7 @@ const LoginPage = () => {
             whileTap={{ scale: 0.98 }}
             className="w-full font-body font-bold text-sm py-4 px-6 btn-matcha flex items-center justify-center gap-2 mt-4"
           >
-            <span>Proceed to Login</span>
+            <span>Login Bang</span>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>

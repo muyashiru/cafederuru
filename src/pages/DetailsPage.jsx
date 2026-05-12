@@ -144,28 +144,21 @@ const DetailsPage = () => {
   useEffect(() => {
     const salAudio = new Audio("/Sal%20Priadi%20-%20Besok%20Kita%20Pergi%20Makan%20(Official%20Audio).mp3");
     salAudio.loop = true;
-    salAudio.volume = 0.6;
+    salAudio.volume = 0.6; 
 
-    const playSalPriadi = () => {
-      salAudio.play().catch(e => console.log("Autoplay blocked or audio missing:", e));
-    };
-
-    if (window.hachimiAudio && !window.hachimiAudio.ended) {
-      // Tunggu Hachimi selesai dulu
-      window.hachimiAudio.addEventListener('ended', playSalPriadi);
-    } else {
-      // Mainkan Sal Priadi langsung
-      playSalPriadi();
+    // Langsung matikan Hachimi jika masih berjalan
+    if (window.hachimiAudio) {
+      window.hachimiAudio.pause();
+      window.hachimiAudio.src = "";
+      window.hachimiAudio = null;
     }
+
+    // Langsung putar Sal Priadi
+    salAudio.play().catch(e => console.log("Autoplay blocked or audio missing:", e));
 
     return () => {
       salAudio.pause();
       salAudio.src = "";
-      if (window.hachimiAudio) {
-        window.hachimiAudio.pause();
-        window.hachimiAudio.src = "";
-        window.hachimiAudio = null;
-      }
     };
   }, []);
 

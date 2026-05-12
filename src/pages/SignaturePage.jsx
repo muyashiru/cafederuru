@@ -546,7 +546,7 @@ const SignaturePage = () => {
               src="/WhatsApp%20Image%202026-05-12%20at%2015.44.25.jpeg"
               alt="Jumpscare"
               initial={{ scale: 0.1, opacity: 0 }}
-              animate={{ scale: 0.8, opacity: 1 }}
+              animate={{ scale: 1.0, opacity: 1 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
               className="w-full h-full object-cover"
             />

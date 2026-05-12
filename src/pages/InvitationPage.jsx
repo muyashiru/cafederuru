@@ -42,18 +42,22 @@ const InvitationPage = () => {
   };
 
   const containerVariants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 0, scale: 0.95 },
     visible: {
       opacity: 1,
+      scale: 1,
       transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.1,
+        staggerChildren: 0.1,
+        delayChildren: 0.05,
+        type: "spring",
+        stiffness: 150,
+        damping: 20
       },
     },
   };
 
   const itemVariants = {
-    hidden: { y: 15, opacity: 0 },
+    hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
@@ -72,138 +76,96 @@ const InvitationPage = () => {
         ) : (
           <div
             key="content"
-            className="h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-cream via-beige to-cream"
+            className="h-screen w-full flex flex-col items-center justify-center p-5 relative overflow-hidden"
           >
-            {/* Decorative Elements - Smaller */}
-            <div className="absolute top-3 right-3 flex gap-3 opacity-60 z-0">
-              <span className="text-lg animate-float">🍵</span>
-              <span
-                className="text-lg animate-float"
-                style={{ animationDelay: "0.5s" }}
-              >
-                ✨
-              </span>
-              <span
-                className="text-lg animate-float"
-                style={{ animationDelay: "1s" }}
-              >
-                💚
-              </span>
-            </div>
+            {/* Background Floating Elements */}
+            <div className="absolute top-10 right-10 opacity-70 animate-float-delayed z-0 text-3xl">🍵</div>
+            <div className="absolute bottom-20 left-10 opacity-60 animate-float z-0 text-2xl">✨</div>
+            <div className="absolute top-1/4 left-5 opacity-40 animate-float-delayed z-0 text-4xl">🍃</div>
+            <div className="absolute bottom-1/3 right-5 opacity-50 animate-float z-0 text-3xl">💚</div>
 
             <motion.div
-              className="max-w-[380px] w-full bg-white/95 backdrop-blur-lg rounded-3xl px-6 py-6 shadow-[0_10px_40px_rgba(136,176,75,0.2)] border border-matcha-primary/10 relative z-10 flex flex-col"
+              className="max-w-[380px] w-full glass-panel px-6 py-8 relative z-10 flex flex-col items-center"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
             >
-              {/* Title - Compact */}
-              <motion.div className="text-center mb-3" variants={itemVariants}>
-                <h1 className="font-heading text-4xl text-matcha-primary tracking-[3px] mb-1 font-semibold drop-shadow-lg animate-pulse">
+              {/* Profile / Avatar Graphic */}
+              <motion.div
+                className="w-20 h-20 mb-4 bg-matcha-100 rounded-[1.5rem] rotate-3 flex items-center justify-center shadow-inner border-2 border-white"
+                variants={itemVariants}
+                whileHover={{ rotate: 12, scale: 1.05 }}
+              >
+                <span className="text-4xl animate-pulse-soft">💌</span>
+              </motion.div>
+
+              {/* Title */}
+              <motion.div className="text-center mb-4" variants={itemVariants}>
+                <h1 className="font-heading text-4xl text-matcha-dark tracking-wide mb-1 font-bold">
                   SUKMA
                 </h1>
-                <p className="font-body text-[10px] text-matcha-dark tracking-wider">
-                  (Surat Undangan Kafe Matcha)
+                <p className="font-accent text-[11px] text-matcha-primary tracking-[0.2em] font-medium uppercase">
+                  Surat Undangan Kafe Matcha
                 </p>
               </motion.div>
 
-              {/* Divider - Compact */}
+              {/* Message */}
               <motion.div
-                className="flex items-center gap-2 my-3"
+                className="text-center w-full space-y-3 mb-6 bg-white/40 p-4 rounded-2xl border border-white/50 shadow-inner"
                 variants={itemVariants}
               >
-                <div className="flex-1 h-[2px] bg-gradient-to-r from-transparent via-matcha-light to-transparent"></div>
-                <span
-                  className="text-base animate-spin"
-                  style={{ animationDuration: "4s" }}
-                >
-                  ☕
-                </span>
-                <div className="flex-1 h-[2px] bg-gradient-to-r from-transparent via-matcha-light to-transparent"></div>
-              </motion.div>
-
-              {/* Message - Compact */}
-              <motion.div
-                className="text-center mb-3 space-y-2"
-                variants={itemVariants}
-              >
-                <p className="font-heading text-sm font-medium text-matcha-dark">
-                  Hawow seng, how's ur day? :)
+                <p className="font-heading text-sm font-semibold text-gray-800">
+                  Hawow seng, how's ur day? ✨
                 </p>
                 <p className="font-body text-xs text-gray-600 leading-relaxed">
-                  We haven't meet for{" "}
-                  <span className="font-bold text-sm text-gradient-matcha">
+                  We haven't met for{" "}
+                  <span className="font-bold text-matcha-dark bg-matcha-100 px-1.5 py-0.5 rounded-md">
                     {minutesSinceLastMeet.toLocaleString()}
                   </span>{" "}
-                  minute and{" "}
-                  <span className="font-bold text-sm text-gradient-matcha">
+                  minutes and{" "}
+                  <span className="font-bold text-matcha-dark bg-matcha-100 px-1.5 py-0.5 rounded-md">
                     {secondsSinceLastMeet}
                   </span>{" "}
-                  second
+                  seconds.
                 </p>
                 <p className="font-body text-xs text-gray-600 leading-relaxed">
                   I still remember that you wish we had a study date at Cafe de
-                  RURU, so... shall we? :D
+                  RURU... shall we? :D
                 </p>
               </motion.div>
 
-              {/* Question - Compact */}
+              {/* Question */}
               <motion.div
-                className="text-center my-3 p-3 bg-gradient-to-br from-matcha-light/10 to-peach/10 rounded-xl border-2 border-dashed border-matcha-light"
+                className="text-center w-full mb-6"
                 variants={itemVariants}
               >
-                <h2 className="font-heading text-sm text-matcha-dark font-medium leading-relaxed">
-                  Will you attend this special date at Cafe de RURU on 14 April? ☕✨
+                <h2 className="font-heading text-base text-gray-800 font-bold leading-relaxed px-2">
+                  Will you attend this special date at Cafe de RURU on 14 April? 🥺
                 </h2>
               </motion.div>
 
-              {/* Buttons - Compact */}
+              {/* Buttons */}
               <motion.div
-                className="flex flex-col gap-2.5 mt-3"
+                className="flex flex-col gap-3 w-full"
                 variants={itemVariants}
               >
-                <motion.button
+                <button
                   onClick={handleYesClick}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="w-full py-3 px-6 bg-gradient-to-r from-matcha-primary to-matcha-light text-white font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-body tracking-wide"
+                  className="w-full py-3.5 px-6 btn-matcha flex items-center justify-center gap-2"
                 >
-                  Yes, Give Me The Details! ✨
-                </motion.button>
+                  <span>Yes, I will attend!</span>
+                  <span className="text-lg">✨</span>
+                </button>
 
-                <motion.button
+                <button
                   onClick={handleNoClick}
                   disabled={isDeleting}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="w-full py-3 px-6 bg-gradient-to-r from-softpink to-peach text-gray-800 font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-body tracking-wide disabled:opacity-50"
+                  className="w-full py-3.5 px-6 bg-white/70 text-gray-600 font-semibold rounded-2xl border-2 border-transparent hover:border-softpink hover:bg-softpink/20 hover:text-red-500 transition-all duration-300 font-body text-sm disabled:opacity-50"
                 >
-                  {isDeleting ? "Processing..." : "No, Thank You 💔"}
-                </motion.button>
+                  {isDeleting ? "Processing..." : "No (delete this website)"}
+                </button>
               </motion.div>
             </motion.div>
-
-            {/* Bottom Decoration - Smaller */}
-            <div className="absolute bottom-3 left-3 flex gap-3 opacity-60 z-0">
-              <span
-                className="text-lg animate-float"
-                style={{ animationDelay: "0s" }}
-              >
-                🌿
-              </span>
-              <span
-                className="text-lg animate-float"
-                style={{ animationDelay: "0.7s" }}
-              >
-                💚
-              </span>
-              <span
-                className="text-lg animate-float"
-                style={{ animationDelay: "1.2s" }}
-              >
-                🍃
-              </span>
-            </div>
           </div>
         )}
       </AnimatePresence>

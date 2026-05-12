@@ -64,139 +64,120 @@ const LoginPage = () => {
   };
 
   const containerVariants = {
-    hidden: { opacity: 0, scale: 0.9 },
+    hidden: { opacity: 0, scale: 0.95 },
     visible: {
       opacity: 1,
       scale: 1,
       transition: {
-        duration: 0.3,
+        duration: 0.4,
         staggerChildren: 0.1,
+        type: "spring",
+        damping: 25,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { y: 15, opacity: 0 },
+    hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
+      transition: { type: "spring", stiffness: 120 }
     },
   };
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-cream via-beige to-cream">
-      {/* Decorative Top */}
-      <div className="absolute top-3 right-3 flex gap-3 opacity-60 z-0">
-        <span className="text-lg animate-float">🔐</span>
-        <span
-          className="text-lg animate-float"
-          style={{ animationDelay: "0.5s" }}
-        >
-          💕
-        </span>
-      </div>
+    <div className="h-screen w-full flex flex-col items-center justify-center p-5 relative overflow-hidden">
+      {/* Decorative Background */}
+      <div className="absolute top-1/4 right-8 opacity-60 animate-float z-0 text-3xl">🔐</div>
+      <div className="absolute bottom-1/4 left-8 opacity-50 animate-float-delayed z-0 text-3xl">💕</div>
 
       <motion.div
-        className={`max-w-[380px] w-full bg-white/95 backdrop-blur-lg rounded-3xl px-6 py-5 shadow-[0_10px_40px_rgba(136,176,75,0.2)] border border-matcha-primary/10 relative z-10 ${
+        className={`max-w-[380px] w-full glass-panel px-6 py-8 relative z-10 ${
           isShaking ? "animate-[shake_0.5s_ease-in-out]" : ""
         }`}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        {/* Header - Compact */}
-        <motion.div className="text-center mb-4" variants={itemVariants}>
-          <h1 className="font-heading text-2xl text-matcha-primary font-semibold mb-1">
-            Siapa nih yang login?🤔
+        {/* Header */}
+        <motion.div className="text-center mb-6" variants={itemVariants}>
+          <div className="w-16 h-16 mx-auto mb-3 bg-white/50 rounded-full flex items-center justify-center border border-white shadow-sm">
+             <span className="text-3xl">🕵🏻‍♀️</span>
+          </div>
+          <h1 className="font-heading text-2xl text-matcha-dark font-bold mb-1">
+            Siapa nih yang login?
           </h1>
-          <p className="font-body text-xs text-gray-600">
-            Isi form di bawah ya buat lanjut~
+          <p className="font-body text-xs text-gray-500 font-medium tracking-wide">
+            VERIFICATION REQUIRED ✨
           </p>
         </motion.div>
 
-        {/* Form - Compact */}
+        {/* Form */}
         <motion.form
-          className="space-y-4"
+          className="space-y-5"
           onSubmit={handleLogin}
           variants={itemVariants}
         >
           {/* Username Dropdown */}
-          <div className="space-y-1.5">
-            <label className="block font-body text-[11px] font-semibold text-matcha-dark">
-              Siapa nama kamu? ✨
+          <div className="space-y-2">
+            <label className="block font-body text-xs font-bold text-matcha-dark/80 uppercase tracking-wider ml-1">
+              Nama Kamu
             </label>
             <Listbox value={selectedUsername} onChange={setSelectedUsername}>
               <div className="relative">
-                <Listbox.Button className="w-full font-body text-xs px-3 py-2.5 border-2 border-matcha-light rounded-xl bg-white text-gray-700 cursor-pointer transition-all duration-300 outline-none hover:border-matcha-primary focus:border-matcha-primary focus:ring-2 focus:ring-matcha-primary/10 text-left flex items-center justify-between">
+                <Listbox.Button className="w-full font-body text-sm px-4 py-3.5 glass-input text-left flex items-center justify-between group">
                   <span
-                    className={
-                      selectedUsername ? "text-gray-700" : "text-gray-400"
-                    }
+                    className={`block truncate ${selectedUsername ? "text-gray-800 font-medium" : "text-gray-400"}`}
                   >
-                    {selectedUsername
-                      ? selectedUsername.label
-                      : "-- Pilih nama kamu --"}
+                    {selectedUsername ? selectedUsername.label : "Pilih identitas..."}
                   </span>
-                  <svg
-                    className="w-4 h-4 text-matcha-primary"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
+                  <span className="pointer-events-none flex items-center text-matcha-primary group-hover:text-matcha-dark transition-colors">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
                 </Listbox.Button>
-                <Listbox.Options className="absolute z-10 w-full mt-1 bg-white border-2 border-matcha-light rounded-xl shadow-lg max-h-48 overflow-auto">
-                  {usernameOptions.map((option) => (
-                    <Listbox.Option
-                      key={option.value}
-                      value={option}
-                      className={({ active }) =>
-                        `cursor-pointer select-none relative py-2 px-3 text-xs ${
-                          active
-                            ? "bg-matcha-light/20 text-matcha-dark"
-                            : "text-gray-700"
-                        }`
-                      }
-                    >
-                      {({ selected }) => (
-                        <span
-                          className={`block truncate ${
-                            selected
-                              ? "font-semibold text-matcha-dark"
-                              : "font-normal"
-                          }`}
-                        >
-                          {option.label}
-                        </span>
-                      )}
-                    </Listbox.Option>
-                  ))}
-                </Listbox.Options>
+                <AnimatePresence>
+                  <Listbox.Options className="absolute z-20 w-full mt-2 bg-white/90 backdrop-blur-xl border border-white shadow-xl rounded-2xl max-h-60 overflow-auto focus:outline-none hide-scrollbar">
+                    {usernameOptions.map((option, idx) => (
+                      <Listbox.Option
+                        key={option.value}
+                        value={option}
+                        className={({ active }) =>
+                          `cursor-pointer select-none relative py-3 px-4 text-sm transition-colors border-b border-gray-100 last:border-0 ${
+                            active ? "bg-matcha-50 text-matcha-dark" : "text-gray-700 hover:bg-gray-50"
+                          }`
+                        }
+                      >
+                        {({ selected }) => (
+                          <span className={`block truncate ${selected ? "font-bold text-matcha-dark" : "font-normal"}`}>
+                            {option.label}
+                          </span>
+                        )}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>
+                </AnimatePresence>
               </div>
             </Listbox>
           </div>
 
           {/* Date Picker */}
-          <div className="space-y-1.5">
+          <div className="space-y-2 relative z-10">
             <label
               htmlFor="date"
-              className="block font-body text-[11px] font-semibold text-matcha-dark"
+              className="block font-body text-xs font-bold text-matcha-dark/80 uppercase tracking-wider ml-1"
             >
-              Kapan terakhir kali kita ketemu? 📅
+              Terakhir Ketemu
             </label>
             <DatePicker
               id="date"
               selected={selectedDate}
               onChange={(date) => setSelectedDate(date)}
               dateFormat="dd MMMM yyyy"
-              placeholderText="Pilih tanggal..."
-              className="w-full font-body text-sm px-3 py-2.5 border-2 border-matcha-light rounded-xl bg-white text-gray-700 cursor-pointer transition-all duration-300 outline-none hover:border-matcha-primary focus:border-matcha-primary focus:ring-2 focus:ring-matcha-primary/10"
+              placeholderText="Pilih tanggal di kalender..."
+              className="w-full font-body text-sm px-4 py-3.5 glass-input text-gray-800 placeholder-gray-400 font-medium"
               maxDate={new Date()}
               showMonthDropdown
               showYearDropdown
@@ -205,14 +186,15 @@ const LoginPage = () => {
           </div>
 
           {/* Error Message */}
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {errorMessage && (
               <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="bg-gradient-to-r from-red-400 to-red-500 text-white px-3 py-2 rounded-lg text-xs font-medium text-center shadow-lg"
+                initial={{ opacity: 0, height: 0, y: -10 }}
+                animate={{ opacity: 1, height: "auto", y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -10 }}
+                className="bg-red-50/80 backdrop-blur-sm border border-red-200 text-red-600 px-4 py-3 rounded-xl text-xs font-semibold text-center shadow-sm flex items-center justify-center gap-2"
               >
+                <span>⚠️</span>
                 {errorMessage}
               </motion.div>
             )}
@@ -223,29 +205,21 @@ const LoginPage = () => {
             type="submit"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full font-body font-semibold text-sm py-3 px-6 bg-gradient-to-r from-matcha-primary to-matcha-light text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 tracking-wide mt-2"
+            className="w-full font-body font-bold text-sm py-4 px-6 btn-matcha flex items-center justify-center gap-2 mt-4"
           >
-            Login 🚀
+            <span>Proceed to Login</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
           </motion.button>
         </motion.form>
       </motion.div>
 
-      {/* Decorative Bottom */}
-      <div className="absolute bottom-3 left-3 flex gap-3 opacity-60 z-0">
-        <span className="text-lg animate-float">🌸</span>
-        <span
-          className="text-lg animate-float"
-          style={{ animationDelay: "0.7s" }}
-        >
-          💚
-        </span>
-      </div>
-
       <style>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-          20%, 40%, 60%, 80% { transform: translateX(5px); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+          20%, 40%, 60%, 80% { transform: translateX(4px); }
         }
       `}</style>
     </div>

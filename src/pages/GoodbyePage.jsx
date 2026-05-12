@@ -24,9 +24,6 @@ const GoodbyePage = () => {
         animate={{ opacity: 1 }}
         className="text-center"
       >
-        <h1 className="text-red-500 font-mono text-2xl md:text-4xl mb-6 font-bold uppercase tracking-widest animate-pulse">
-          Goodbye :D
-        </h1>
         <p className="text-white font-mono text-lg md:text-xl mb-8">
           Website akan dihapus...
         </p>

@@ -72,6 +72,50 @@ export const uploadSignatureImage = async (base64Image, username) => {
 };
 
 /**
+ * Upload face verification image to Supabase Storage (reuses 'signatures' bucket)
+ */
+export const uploadFaceImage = async (base64Image, username) => {
+  try {
+    console.log("🚀 Starting face upload for:", username);
+    const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, "");
+    const byteCharacters = atob(base64Data);
+    const byteArrays = [];
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteArrays.push(byteCharacters.charCodeAt(i));
+    }
+    const blob = new Blob([new Uint8Array(byteArrays)], { type: "image/png" });
+    const timestamp = new Date().getTime();
+    const fileName = `face-${username}-${timestamp}.png`;
+    const filePath = `${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from("signatures")
+      .upload(filePath, blob, {
+        contentType: "image/png",
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) throw error;
+
+    const { data: publicUrlData } = supabase.storage
+      .from("signatures")
+      .getPublicUrl(filePath);
+
+    return {
+      success: true,
+      url: publicUrlData.publicUrl,
+    };
+  } catch (error) {
+    console.error("❌ Error uploading face image:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+/**
  * Save RSVP response to database
  * @param {Object} data - RSVP data
  * @param {string} data.username - Selected username from dropdown
@@ -83,7 +127,7 @@ export const uploadSignatureImage = async (base64Image, username) => {
  */
 export const saveRSVP = async (data) => {
   try {
-    const { username, loginDate, signatureImage, dressCode, customRundown } =
+    const { username, loginDate, signatureImage, faceImage, dressCode, customRundown } =
       data;
 
     // Validate required fields
@@ -92,6 +136,7 @@ export const saveRSVP = async (data) => {
     }
 
     let signatureUrl = null;
+    let faceUrl = null;
 
     // Upload signature image to storage if provided
     if (signatureImage) {
@@ -104,6 +149,16 @@ export const saveRSVP = async (data) => {
       }
     }
 
+    // Upload face image to storage if provided
+    if (faceImage) {
+      const uploadResult = await uploadFaceImage(faceImage, username);
+      if (uploadResult.success) {
+        faceUrl = uploadResult.url;
+      } else {
+        console.warn("Failed to upload face image");
+      }
+    }
+
     // Prepare data for insert
     const rsvpData = {
       username,
@@ -113,6 +168,11 @@ export const saveRSVP = async (data) => {
       dress_code: dressCode || null,
       custom_rundown: customRundown || null,
     };
+
+    // Add face_image only if we have it (Note: Ensure the DB table has this column!)
+    if (faceUrl) {
+      rsvpData.face_image = faceUrl;
+    }
 
     // Insert to Supabase
     const { data: insertedData, error } = await supabase

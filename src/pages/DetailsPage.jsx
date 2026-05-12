@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   updateDressCode,
@@ -20,22 +20,25 @@ const DEFAULT_RUNDOWN = [
   { time: "15:30", activity: "🏠 Pulang (safe trip!)" },
 ];
 
-// Benefits Data - WITH CATEGORIES
 const BENEFITS = [
+  {
+    category: "Experience & Fun",
+    items: [
+      { icon: "🌿", text: "Fresh Air" },
+      { icon: "📸", text: "Aesthetic Photo Spot" },
+      { icon: "🎮", text: "Optional Games & Fun" },
+      { icon: "🗣️", text: "Sharing Cerita & Deep Talk" },
+      { icon: "⏰", text: "Quality Time Together" },
+      { icon: "💕", text: "Bisa Pacaran" },
+    ],
+  },
   {
     category: "Study & Productivity",
     items: [
       { icon: "📚", text: "Nuggas Bareng" },
       { icon: "💻", text: "Free WiFi" },
       { icon: "🪑", text: "Tempat Duduk Nyaman" },
-      { icon: "🔌", text: "Free Charger" },
-    ],
-  },
-  {
-    category: "Food & Drink",
-    items: [
-      { icon: "🍵", text: "Get Free Matcha" },
-      { icon: "🍽️", text: "Get Free Dish" },
+      { icon: "🔌", text: "Free Charger Spot" },
     ],
   },
   {
@@ -47,17 +50,6 @@ const BENEFITS = [
     ],
   },
   {
-    category: "Experience & Fun",
-    items: [
-      { icon: "🌿", text: "Fresh Air" },
-      { icon: "📸", text: "Aesthetic Photo Spot" },
-      { icon: "🎮", text: "Optional Games & Fun" },
-      { icon: "🗣️", text: "Sharing Cerita & Deep Talk" },
-      { icon: "⏰", text: "Quality Time Together" },
-      { icon: "💕", text: "Bisa Pacaran (halal kok 😇)" },
-    ],
-  },
-  {
     category: "Extras",
     items: [
       { icon: "🎓", text: "Matcha Education" },
@@ -65,6 +57,22 @@ const BENEFITS = [
       { icon: "🤝", text: "Dapat Teman yang Supportive" },
     ],
   },
+  {
+    category: "Food & Drink",
+    items: [
+      { icon: "🍵", text: "Get Free Matcha" },
+      { icon: "🍽️", text: "Get Free Dish" },
+    ],
+  },
+];
+
+// Calculate Pie Chart Data
+const PIE_DATA = [
+  { label: "Fun", value: 33, color: "#99AD7A" },
+  { label: "Study", value: 22, color: "#546B41" },
+  { label: "Tech", value: 17, color: "#FFD1DC" },
+  { label: "Extras", value: 17, color: "#DCCCAC" },
+  { label: "Food", value: 11, color: "#FFDAB9" },
 ];
 
 // Checklist Items
@@ -85,17 +93,6 @@ const INITIAL_CHECKLIST = {
     { id: 11, icon: "💰", text: "Uang Parkir", checked: false },
   ],
 };
-
-// Dress Code Options
-const DRESS_CODE_OPTIONS = [
-  { value: "", label: "Pilih warna outfit..." },
-  { value: "white", label: "🤍 White (Clean & Fresh)" },
-  { value: "green", label: "💚 Green (Matching Matcha)" },
-  { value: "pink", label: "🩷 Pink (Soft & Feminine)" },
-  { value: "brown", label: "🤎 Brown/Beige (Earthy)" },
-  { value: "black", label: "🖤 Black (Classic & Chic)" },
-  { value: "surprise", label: "🌈 Surprise Me!" },
-];
 
 const DetailsPage = () => {
   const navigate = useNavigate();
@@ -151,13 +148,6 @@ const DetailsPage = () => {
       const now = new Date();
       const difference = targetDate.getTime() - now.getTime();
 
-      console.log("Countdown:", {
-        target: targetDate.toString(),
-        now: now.toString(),
-        diff: difference,
-        diffDays: difference / (1000 * 60 * 60 * 24),
-      });
-
       if (difference > 0) {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
         const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
@@ -177,12 +167,12 @@ const DetailsPage = () => {
 
   // Floating elements
   useEffect(() => {
-    const elements = Array.from({ length: 6 }, (_, i) => ({
+    const elements = Array.from({ length: 8 }, (_, i) => ({
       id: i,
-      emoji: ["🍵", "🌿", "✨", "💚"][i % 4],
-      left: `${Math.random() * 80 + 10}%`,
+      emoji: ["🍵", "🌿", "✨", "💚", "🌸"][i % 5],
+      left: `${Math.random() * 90}%`,
       delay: Math.random() * 5,
-      duration: 15 + Math.random() * 10,
+      duration: 15 + Math.random() * 15,
     }));
     setFloatingElements(elements);
   }, []);
@@ -266,20 +256,32 @@ const DetailsPage = () => {
     }
   };
 
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", damping: 25, stiffness: 100 }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream via-beige to-matcha-light/20 relative overflow-hidden">
+    <div className="min-h-screen bg-cream relative overflow-x-hidden font-body">
+      {/* Elegant Colorful Background Blobs (Not Tacky Gradients) */}
+      <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-matcha-primary rounded-full mix-blend-multiply filter blur-[120px] opacity-30 animate-pulse-soft z-0 pointer-events-none"></div>
+      <div className="fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-beige rounded-full mix-blend-multiply filter blur-[120px] opacity-50 z-0 pointer-events-none" style={{ animationDelay: '1s' }}></div>
+      <div className="fixed top-[40%] left-[20%] w-[300px] h-[300px] bg-matcha-dark rounded-full mix-blend-multiply filter blur-[150px] opacity-10 z-0 pointer-events-none"></div>
+
       {/* Floating Decorations */}
       {floatingElements.map((element) => (
         <motion.div
           key={element.id}
-          className="absolute text-2xl opacity-10 pointer-events-none"
+          className="absolute text-2xl opacity-40 pointer-events-none z-0"
           style={{ left: element.left, top: "-50px" }}
-          animate={{ y: ["0vh", "110vh"] }}
+          animate={{ y: ["0vh", "110vh"], rotate: [0, 360] }}
           transition={{
-            duration: element.duration,
-            delay: element.delay,
-            repeat: Infinity,
-            ease: "linear",
+            y: { duration: element.duration, delay: element.delay, repeat: Infinity, ease: "linear" },
+            rotate: { duration: element.duration * 0.8, repeat: Infinity, ease: "linear" }
           }}
         >
           {element.emoji}
@@ -287,83 +289,270 @@ const DetailsPage = () => {
       ))}
 
       {/* Main Content */}
-      <div className="relative z-10 p-4 sm:p-6 pb-24 max-w-lg mx-auto">
+      <div className="relative z-10 p-5 sm:p-8 pb-32 max-w-xl mx-auto space-y-8">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-6"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", bounce: 0.5 }}
+          className="text-center pt-4 pb-2 relative z-10"
         >
-          <h1 className="font-lora text-3xl sm:text-4xl font-bold text-matcha-dark mb-2">
-            🎉 The Details! 🎉
+          <div className="inline-block p-3 bg-white/80 backdrop-blur-md rounded-2xl mb-4 shadow-sm border border-matcha-100 rotate-3">
+            <span className="text-4xl">🎉</span>
+          </div>
+          <h1 className="font-heading text-4xl sm:text-5xl font-bold text-matcha-dark mb-2 tracking-tight">
+            The Details!
           </h1>
-          <p className="font-inter text-sm text-matcha-primary">
+          <p className="font-accent tracking-widest uppercase text-xs font-semibold text-matcha-primary bg-white/50 inline-block px-4 py-1.5 rounded-full backdrop-blur-sm border border-matcha-100/50">
             Everything you need to know ☕💚
           </p>
         </motion.div>
 
         {/* Countdown Timer */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 mb-6 shadow-lg border-2 border-matcha-light"
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+          className="glass-panel p-6 sm:p-8"
         >
-          <h2 className="font-outfit text-base sm:text-lg font-bold text-center text-matcha-dark mb-3">
-            ⏱️ COUNTDOWN TO OUR DATE ⏱️
+          <h2 className="font-heading text-lg sm:text-xl font-bold text-center text-matcha-dark mb-1">
+            COUNTDOWN TO OUR DATE
           </h2>
-          <div className="text-center text-xs text-gray-600 mb-2 font-inter">
+          <div className="text-center text-xs text-gray-500 mb-6 font-accent tracking-wider uppercase font-medium">
             Kamis, 14 Mei 2026 • 07:00 WIB
           </div>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-3">
             {[
               { label: "DAYS", value: countdown.days },
               { label: "HOURS", value: countdown.hours },
               { label: "MINS", value: countdown.minutes },
               { label: "SECS", value: countdown.seconds },
             ].map((item, idx) => (
-              <motion.div
-                key={idx}
-                className="bg-matcha-primary/20 rounded-lg p-2 sm:p-3"
-                animate={{ scale: item.label === "SECS" ? [1, 1.05, 1] : 1 }}
-                transition={{ duration: 1, repeat: Infinity }}
-              >
-                <div className="font-outfit text-xl sm:text-2xl font-bold text-matcha-dark text-center">
-                  {String(item.value).padStart(2, "0")}
-                </div>
-                <div className="font-inter text-[10px] text-matcha-primary mt-1 text-center">
+              <div key={idx} className="flex flex-col items-center">
+                <motion.div
+                  className="w-full aspect-square bg-gradient-to-b from-white to-matcha-50 rounded-2xl shadow-sm border border-matcha-100 flex items-center justify-center mb-2"
+                  animate={{ scale: item.label === "SECS" ? [1, 1.05, 1] : 1 }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                >
+                  <span className="font-heading text-2xl sm:text-3xl font-bold text-matcha-dark">
+                    {String(item.value).padStart(2, "0")}
+                  </span>
+                </motion.div>
+                <span className="font-accent text-[10px] font-bold text-matcha-primary tracking-widest">
                   {item.label}
-                </div>
-              </motion.div>
+                </span>
+              </div>
             ))}
           </div>
         </motion.div>
 
-        {/* Benefits Section - WITH CATEGORIES */}
+        {/* Rundown Section - EDITABLE */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 mb-6 shadow-lg border-2 border-matcha-light"
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+          className="glass-panel p-6 sm:p-8"
         >
-          <h2 className="font-lora text-xl sm:text-2xl font-bold text-matcha-dark mb-4 text-center">
-            🎁 Benefits Datang ke <br></br> Cafe de RURU
-          </h2>
-          <div className="space-y-4">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="font-heading text-xl sm:text-2xl font-bold text-matcha-dark mb-1">
+                ⏰ Rundown Acara
+              </h2>
+              <p className="font-body text-xs text-gray-500">Klik item untuk mengedit ya!</p>
+            </div>
+            <button
+              onClick={handleSaveRundown}
+              disabled={isSavingRundown}
+              className="bg-white text-matcha-dark border border-matcha-200 px-4 py-2 rounded-xl font-body font-semibold text-xs shadow-sm hover:bg-matcha-50 transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              {isSavingRundown ? "Saving..." : <span>💾 Save</span>}
+            </button>
+          </div>
+
+          <div className="overflow-x-auto rounded-2xl border border-white/80 shadow-sm">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-matcha-50/80 border-b border-matcha-100/50">
+                  <th className="font-accent text-[10px] sm:text-xs tracking-widest uppercase font-bold text-matcha-primary px-4 py-3 w-28">Jam</th>
+                  <th className="font-accent text-[10px] sm:text-xs tracking-widest uppercase font-bold text-matcha-primary px-4 py-3">Aktivitas</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white/40">
+                {rundown.map((item, index) => (
+                  <tr key={index} className="border-b border-white/60 hover:bg-white/80 transition-colors group">
+                    <td className="px-4 py-3 align-top whitespace-nowrap">
+                      {editIndex === index && editField === "time" ? (
+                        <div className="flex flex-col gap-1 w-24">
+                          <input
+                            type="time"
+                            value={tempValue}
+                            onChange={(e) => setTempValue(e.target.value)}
+                            className="glass-input px-2 py-1.5 w-full text-xs font-bold text-matcha-dark"
+                            autoFocus
+                          />
+                          <div className="flex gap-1">
+                            <button onClick={handleSaveEdit} className="bg-matcha-primary text-white text-[10px] py-1 rounded-md flex-1 font-bold">OK</button>
+                            <button onClick={handleCancelEdit} className="bg-red-400 text-white text-[10px] py-1 rounded-md flex-1 font-bold">X</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleStartEdit(index, "time")}
+                          className="font-heading font-bold text-matcha-primary text-sm hover:text-matcha-dark transition-colors text-left"
+                        >
+                          {item.time}
+                        </button>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 align-top">
+                      {editIndex === index && editField === "activity" ? (
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <input
+                            type="text"
+                            value={tempValue}
+                            onChange={(e) => setTempValue(e.target.value)}
+                            className="glass-input px-3 py-1.5 w-full text-sm text-gray-700"
+                            autoFocus
+                          />
+                          <div className="flex gap-1 shrink-0">
+                            <button onClick={handleSaveEdit} className="bg-matcha-primary text-white text-xs px-3 py-1.5 rounded-lg">✅</button>
+                            <button onClick={handleCancelEdit} className="bg-red-400 text-white text-xs px-3 py-1.5 rounded-lg">❌</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-start justify-between gap-2 mt-0.5">
+                          <button
+                            onClick={() => handleStartEdit(index, "activity")}
+                            className="font-body font-medium text-sm text-gray-700 hover:text-matcha-dark text-left"
+                          >
+                            {item.activity}
+                          </button>
+                          <button
+                            onClick={() => handleStartEdit(index, "activity")}
+                            className="opacity-0 group-hover:opacity-100 text-matcha-light hover:text-matcha-primary transition-all p-1 text-xs shrink-0"
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+
+        {/* Dress Code Section */}
+        <motion.div
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+          className="glass-panel p-6 sm:p-8"
+        >
+          <div className="text-center mb-6">
+            <h2 className="font-heading text-xl sm:text-2xl font-bold text-matcha-dark mb-1">
+              👗 Dress Code
+            </h2>
+            <p className="font-body text-xs text-gray-500">
+              Ketik warna outfit yang mau kamu pakai!
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={selectedDressCode}
+              onChange={handleDressCodeChange}
+              placeholder="Contoh: Green Matcha, Pink Pastel..."
+              className="flex-1 px-5 py-4 glass-input font-body text-sm font-medium text-gray-700 placeholder-gray-400"
+            />
+            <button
+              onClick={handleSaveDressCode}
+              disabled={isSavingDress || !selectedDressCode}
+              className="btn-matcha px-6 py-4 flex items-center justify-center disabled:opacity-50 whitespace-nowrap"
+            >
+              {isSavingDress ? "Menyimpan..." : "Simpan Warna"}
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Benefits Section */}
+        <motion.div
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+          className="glass-panel p-5 sm:p-8 bg-white/60 backdrop-blur-xl border border-white/80"
+        >
+          <div className="text-center mb-5">
+            <div className="inline-block p-1.5 bg-beige/30 rounded-xl mb-2 border border-beige/50 -rotate-3">
+              <span className="text-xl">🎁</span>
+            </div>
+            <h2 className="font-heading text-xl sm:text-2xl font-bold text-matcha-dark">
+              Benefits Ikut Date Ini
+            </h2>
+          </div>
+
+          {/* Activity Pie Chart */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8 bg-white/50 p-4 rounded-2xl border border-white/60 shadow-sm">
+            <div className="w-32 h-32 relative shrink-0">
+              <svg viewBox="0 0 42 42" className="w-full h-full -rotate-90 drop-shadow-md">
+                <circle cx="21" cy="21" r="15.91549431" fill="transparent" stroke="#FFF8EC" strokeWidth="8" />
+                {PIE_DATA.reduce((acc, slice, i) => {
+                  const dashArray = `${slice.value} ${100 - slice.value}`;
+                  const offset = 100 - acc.cumulative;
+
+                  acc.elements.push(
+                    <circle
+                      key={i}
+                      cx="21"
+                      cy="21"
+                      r="15.91549431"
+                      fill="transparent"
+                      stroke={slice.color}
+                      strokeWidth="8"
+                      strokeDasharray={dashArray}
+                      strokeDashoffset={offset}
+                      className="transition-all duration-1000 ease-out"
+                    />
+                  );
+                  acc.cumulative += slice.value;
+                  return acc;
+                }, { elements: [], cumulative: 0 }).elements}
+              </svg>
+              {/* Inner Text for Donut Hole */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="font-heading text-xl font-bold text-matcha-dark leading-none">100%</span>
+                <span className="font-accent text-[8px] font-bold text-matcha-primary tracking-widest uppercase mt-0.5">Worth It</span>
+              </div>
+            </div>
+
+            {/* Chart Legend */}
+            <div className="grid grid-cols-2 sm:grid-cols-1 gap-x-6 gap-y-2 w-full sm:w-auto">
+              {PIE_DATA.map((item, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: item.color }}></div>
+                  <span className="font-body text-xs font-semibold text-gray-700 whitespace-nowrap">
+                    {item.label} <span className="text-gray-400 font-normal ml-1">{item.value}%</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
             {BENEFITS.map((category, catIndex) => (
-              <div key={catIndex}>
-                <h3 className="font-outfit text-sm sm:text-base font-semibold text-matcha-primary mb-2">
+              <div key={catIndex} className="bg-white/40 p-3 rounded-xl border border-white/60">
+                <h3 className="font-accent font-bold text-[10px] sm:text-xs uppercase tracking-wider text-matcha-primary mb-2">
                   {category.category}
                 </h3>
-                <div className="space-y-1.5">
+                <div className="grid grid-cols-1 gap-1.5">
                   {category.items.map((item, itemIndex) => (
-                    <div
-                      key={itemIndex}
-                      className="flex items-center gap-3 p-2 bg-matcha-light/10 rounded-lg"
-                    >
-                      <span className="text-base sm:text-lg flex-shrink-0">
+                    <div key={itemIndex} className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm text-xs shrink-0">
                         {item.icon}
-                      </span>
-                      <span className="font-inter text-xs sm:text-sm text-gray-700">
+                      </div>
+                      <span className="font-body text-[11px] sm:text-xs font-medium text-gray-700 leading-tight">
                         {item.text}
                       </span>
                     </div>
@@ -374,288 +563,103 @@ const DetailsPage = () => {
           </div>
         </motion.div>
 
-        {/* Rundown Section - EDITABLE */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 mb-6 shadow-lg border-2 border-matcha-light"
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="font-lora text-xl sm:text-2xl font-bold text-matcha-dark">
-              ⏰ Rundown Acara
-            </h2>
-            <button
-              onClick={handleSaveRundown}
-              disabled={isSavingRundown}
-              className="bg-matcha-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-outfit text-xs sm:text-sm hover:bg-matcha-dark transition-colors disabled:opacity-50"
-            >
-              {isSavingRundown ? "Saving..." : "💾 Save"}
-            </button>
-          </div>
-
-          <div className="space-y-2">
-            {rundown.map((item, index) => (
-              <div
-                key={index}
-                className="bg-matcha-light/20 rounded-lg p-2 sm:p-3"
-              >
-                <div className="flex items-start gap-2">
-                  {/* Time */}
-                  {editIndex === index && editField === "time" ? (
-                    <div className="flex flex-col gap-1">
-                      <input
-                        type="time"
-                        value={tempValue}
-                        onChange={(e) => setTempValue(e.target.value)}
-                        className="w-20 bg-white rounded px-2 py-1 font-outfit text-xs sm:text-sm border-2 border-matcha-primary focus:outline-none"
-                        autoFocus
-                      />
-                      <div className="flex gap-1">
-                        <button
-                          onClick={handleSaveEdit}
-                          className="flex-1 bg-green-500 text-white text-xs px-2 py-0.5 rounded"
-                        >
-                          ✓
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          className="flex-1 bg-red-500 text-white text-xs px-2 py-0.5 rounded"
-                        >
-                          ✗
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => handleStartEdit(index, "time")}
-                      className="w-16 sm:w-20 font-outfit font-bold text-matcha-dark text-xs sm:text-sm hover:text-matcha-primary text-left"
-                    >
-                      {item.time}
-                    </button>
-                  )}
-
-                  {/* Activity */}
-                  {editIndex === index && editField === "activity" ? (
-                    <div className="flex-1 flex flex-col gap-1">
-                      <input
-                        type="text"
-                        value={tempValue}
-                        onChange={(e) => setTempValue(e.target.value)}
-                        className="w-full bg-white rounded px-2 py-1 font-inter text-xs sm:text-sm border-2 border-matcha-primary focus:outline-none"
-                        autoFocus
-                      />
-                      <div className="flex gap-1">
-                        <button
-                          onClick={handleSaveEdit}
-                          className="flex-1 bg-green-500 text-white text-xs px-2 py-0.5 rounded"
-                        >
-                          ✓ Save
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          className="flex-1 bg-red-500 text-white text-xs px-2 py-0.5 rounded"
-                        >
-                          ✗ Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex-1 flex items-center justify-between">
-                      <button
-                        onClick={() => handleStartEdit(index, "activity")}
-                        className="flex-1 font-inter text-xs sm:text-sm text-gray-700 hover:text-matcha-primary text-left"
-                      >
-                        {item.activity}
-                      </button>
-                      <button
-                        onClick={() => handleStartEdit(index, "activity")}
-                        className="text-matcha-primary ml-2"
-                      >
-                        ✏️
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p className="text-xs text-gray-500 text-center mt-3 italic">
-            Klik jam atau aktivitas untuk edit
-          </p>
-        </motion.div>
-
-        {/* Dress Code Section - TEXT INPUT */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 mb-6 shadow-lg border-2 border-matcha-light"
-        >
-          <h2 className="font-lora text-xl sm:text-2xl font-bold text-matcha-dark mb-3 text-center">
-            👗 Dress Code
-          </h2>
-          <p className="font-inter text-xs sm:text-sm text-gray-600 text-center mb-4">
-            Mau pakai warna apa nanti?
-          </p>
-
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={selectedDressCode}
-              onChange={handleDressCodeChange}
-              placeholder="Contoh: White, Green, Pink, dll..."
-              className="flex-1 p-3 sm:p-4 rounded-xl border-2 border-matcha-light bg-white font-inter text-sm focus:outline-none focus:border-matcha-primary transition-all shadow-sm"
-            />
-            <button
-              onClick={handleSaveDressCode}
-              disabled={isSavingDress || !selectedDressCode}
-              className="bg-matcha-primary text-white px-4 py-3 rounded-xl font-outfit text-sm hover:bg-matcha-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSavingDress ? "💾..." : "💾"}
-            </button>
-          </div>
-
-          {!isSavingDress && selectedDressCode && (
-            <p className="text-center text-xs text-gray-500 mt-2 italic">
-              Jangan lupa klik 💾 untuk menyimpan
-            </p>
-          )}
-        </motion.div>
-
         {/* Checklist Section */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 mb-6 shadow-lg border-2 border-matcha-light"
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+          className="glass-panel p-5 sm:p-8"
         >
-          <h2 className="font-lora text-xl sm:text-2xl font-bold text-matcha-dark mb-4 text-center">
-            ✅ Checklist Barang
-          </h2>
+          <div className="text-center mb-5">
+            <h2 className="font-heading text-xl sm:text-2xl font-bold text-matcha-dark mb-1">
+              ✅ Checklist Barang
+            </h2>
+            <p className="font-body text-[11px] sm:text-xs text-gray-500">Jangan sampai ketinggalan!</p>
+          </div>
 
-          <div className="mb-5">
-            <h3 className="font-outfit font-semibold text-matcha-primary mb-2 text-sm sm:text-base">
-              Wajib Dibawa:
-            </h3>
-            <div className="space-y-1.5">
-              {checklist.wajib.map((item) => (
-                <label
-                  key={item.id}
-                  className="flex items-center gap-3 p-2 sm:p-3 bg-white rounded-lg cursor-pointer hover:bg-matcha-light/10 transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={item.checked}
-                    onChange={() => handleChecklistToggle("wajib", item.id)}
-                    className="w-4 h-4 sm:w-5 sm:h-5 accent-matcha-primary cursor-pointer"
-                  />
-                  <span className="text-base sm:text-xl">{item.icon}</span>
-                  <span className="font-inter text-xs sm:text-sm flex-1">
-                    {item.text}
-                  </span>
-                </label>
-              ))}
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-accent font-bold text-[10px] sm:text-xs uppercase tracking-wider text-matcha-primary mb-2 px-1">
+                Wajib Dibawa
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                {checklist.wajib.map((item) => (
+                  <label
+                    key={item.id}
+                    className={`flex items-center gap-2 p-2 rounded-xl cursor-pointer transition-all border ${item.checked ? "bg-matcha-50 border-matcha-200 shadow-sm" : "bg-white/40 border-white/60 hover:bg-white/80"
+                      }`}
+                  >
+                    <div className={`w-4 h-4 rounded-[4px] flex items-center justify-center border transition-colors shrink-0 ${item.checked ? "bg-matcha-primary border-matcha-primary" : "bg-white border-gray-300"
+                      }`}>
+                      {item.checked && <span className="text-white text-[10px] font-bold">✓</span>}
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={item.checked}
+                      onChange={() => handleChecklistToggle("wajib", item.id)}
+                      className="hidden"
+                    />
+                    <span className="text-base leading-none">{item.icon}</span>
+                    <span className={`font-body text-[10px] sm:text-xs font-medium leading-tight truncate ${item.checked ? "text-matcha-dark line-through opacity-70" : "text-gray-700"}`}>
+                      {item.text}
+                    </span>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div>
-            <h3 className="font-outfit font-semibold text-matcha-primary mb-2 text-sm sm:text-base">
-              Optional:
-            </h3>
-            <div className="space-y-1.5">
-              {checklist.optional.map((item) => (
-                <label
-                  key={item.id}
-                  className="flex items-center gap-3 p-2 sm:p-3 bg-white rounded-lg cursor-pointer hover:bg-matcha-light/10 transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={item.checked}
-                    onChange={() => handleChecklistToggle("optional", item.id)}
-                    className="w-4 h-4 sm:w-5 sm:h-5 accent-matcha-primary cursor-pointer"
-                  />
-                  <span className="text-base sm:text-xl">{item.icon}</span>
-                  <span className="font-inter text-xs sm:text-sm flex-1">
-                    {item.text}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Tujuan Acara */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 mb-6 shadow-lg border-2 border-matcha-light"
-        >
-          <h2 className="font-lora text-xl sm:text-2xl font-bold text-matcha-dark mb-4 text-center">
-            🎯 Tujuan Acara
-          </h2>
-
-          <div className="mb-4">
-            <h3 className="font-outfit font-semibold text-matcha-primary mb-2 text-sm sm:text-base">
-              Kenapa Acara Ini Diadakan?
-            </h3>
-            <p className="font-inter text-xs sm:text-sm text-gray-700 leading-relaxed">
-              Tujuan acara ini diadakan untuk mengisi wishlist kita untuk bisa
-              Nuggas bareng lagi dan main ke cafe hijau hijau dan juga matcha :P
-            </p>
-          </div>
-
-          <div>
-            <h3 className="font-outfit font-semibold text-matcha-primary mb-2 text-sm sm:text-base">
-              Apa yang Mau Dicapai?
-            </h3>
-            <div className="space-y-2">
-              {[
-                {
-                  icon: "✅",
-                  text: "Ngerjain Tugas (Harus ada progress)",
-                },
-                { icon: "🕑", text: "Quality Time (catch up & ngobrol)" },
-                { icon: "📸", text: "Create Memories (foto-foto aesthetic)" },
-                {
-                  icon: "☕",
-                  text: "Matcha Experience (karena matcha is life)",
-                },
-              ].map((goal, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-3 p-2 sm:p-3 bg-matcha-light/10 rounded-lg"
-                >
-                  <span className="text-base sm:text-xl">{goal.icon}</span>
-                  <span className="font-inter text-xs sm:text-sm text-gray-700">
-                    {goal.text}
-                  </span>
-                </div>
-              ))}
+            <div>
+              <h3 className="font-accent font-bold text-[10px] sm:text-xs uppercase tracking-wider text-matcha-primary mb-2 px-1">
+                Optional
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                {checklist.optional.map((item) => (
+                  <label
+                    key={item.id}
+                    className={`flex items-center gap-2 p-2 rounded-xl cursor-pointer transition-all border ${item.checked ? "bg-matcha-50 border-matcha-200 shadow-sm" : "bg-white/40 border-white/60 hover:bg-white/80"
+                      }`}
+                  >
+                    <div className={`w-4 h-4 rounded-[4px] flex items-center justify-center border transition-colors shrink-0 ${item.checked ? "bg-matcha-primary border-matcha-primary" : "bg-white border-gray-300"
+                      }`}>
+                      {item.checked && <span className="text-white text-[10px] font-bold">✓</span>}
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={item.checked}
+                      onChange={() => handleChecklistToggle("optional", item.id)}
+                      className="hidden"
+                    />
+                    <span className="text-base leading-none">{item.icon}</span>
+                    <span className={`font-body text-[10px] sm:text-xs font-medium leading-tight truncate ${item.checked ? "text-matcha-dark line-through opacity-70" : "text-gray-700"}`}>
+                      {item.text}
+                    </span>
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Location & Map - CAFE DE RURU */}
+        {/* Location & Map */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 mb-6 shadow-lg border-2 border-matcha-light"
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+          className="glass-panel p-6 sm:p-8"
         >
-          <h2 className="font-lora text-xl sm:text-2xl font-bold text-matcha-dark mb-4 text-center">
-            📍 Location: Cafe de RURU
-          </h2>
+          <div className="text-center mb-6">
+            <h2 className="font-heading text-xl sm:text-2xl font-bold text-matcha-dark mb-1">
+              📍 Location
+            </h2>
+            <p className="font-body text-sm font-bold text-matcha-primary">Cafe de RURU</p>
+          </div>
 
-          {/* Google Maps Embed */}
-          <div className="rounded-xl overflow-hidden shadow-lg mb-3">
+          <div className="rounded-2xl overflow-hidden shadow-sm border border-white mb-4 bg-white p-1">
             <iframe
               src="https://maps.google.com/maps?q=Cafe+de+RURU,+Jl.+Anggrek+No.24,+Merdeka,+Kec.+Sumur+Bandung,+Kota+Bandung,+Jawa+Barat+40113&t=&z=15&ie=UTF8&iwloc=&output=embed"
               width="100%"
               height="250"
-              style={{ border: 0 }}
+              style={{ border: 0, borderRadius: '0.75rem' }}
               allowFullScreen=""
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -667,58 +671,68 @@ const DetailsPage = () => {
             href="https://maps.app.goo.gl/rEXZybhtg6BHFGXz7"
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full bg-matcha-primary text-white text-center py-2 rounded-lg font-outfit hover:bg-matcha-dark transition-colors"
+            className="btn-matcha w-full py-4 flex items-center justify-center gap-2"
           >
-            📍 Open in Google Maps
+            <span>Buka di Google Maps</span>
+            <span className="text-lg">🗺️</span>
           </a>
-
-          <p className="font-inter text-xs text-center text-gray-600 mt-2">
-            Click button above to navigate 📱
-          </p>
         </motion.div>
 
-        {/* Closing Message & Quote */}
+        {/* Closing Message */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="bg-gradient-to-br from-matcha-primary to-matcha-dark rounded-2xl p-5 sm:p-6 mb-6 shadow-xl text-white text-center"
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+          className="bg-matcha-dark rounded-[2rem] p-8 sm:p-10 shadow-xl text-white text-center relative overflow-hidden border border-matcha-primary/30"
         >
-          <p className="font-lora text-base sm:text-lg italic mb-4 leading-relaxed">
+          <div className="absolute top-[-50%] left-[-10%] w-64 h-64 bg-matcha-primary rounded-full mix-blend-screen filter blur-[60px] opacity-40"></div>
+          <div className="absolute bottom-[-50%] right-[-10%] w-64 h-64 bg-beige rounded-full mix-blend-screen filter blur-[60px] opacity-20"></div>
+          <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+          <p className="font-heading text-lg sm:text-xl italic mb-6 leading-relaxed relative z-10 font-medium text-cream">
             "Life is like a cup of matcha – a little bitter, a little sweet, but
             always better when shared with the right person."
           </p>
-          <p className="font-inter text-xs sm:text-sm opacity-90">
+          <div className="w-12 h-1 bg-beige/50 mx-auto rounded-full mb-6 relative z-10"></div>
+          <p className="font-accent tracking-widest uppercase text-xs font-bold text-beige relative z-10">
             Can't wait to see you there! ☕✨
           </p>
         </motion.div>
 
-        {/* Save and See You Button */}
+        {/* Save All Floating Button */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.9 }}
-          className="text-center"
+          className="fixed bottom-6 left-0 right-0 z-50 px-5 flex justify-center pointer-events-none"
         >
-          {saveSuccess && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-green-500 text-white px-6 py-3 rounded-full mb-4 inline-block font-outfit font-semibold"
-            >
-              ✓ All data saved successfully!
-            </motion.div>
-          )}
+          <div className="pointer-events-auto flex flex-col items-center">
+            <AnimatePresence>
+              {saveSuccess && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                  className="bg-white/90 backdrop-blur-md text-matcha-dark border border-matcha-200 px-5 py-2.5 rounded-full mb-3 font-body font-bold text-xs shadow-lg flex items-center gap-2"
+                >
+                  <span className="text-green-500">✓</span> Semua perubahan tersimpan!
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          <motion.button
-            onClick={handleSaveAll}
-            disabled={isSavingAll}
-            whileHover={{ scale: isSavingAll ? 1 : 1.05 }}
-            whileTap={{ scale: isSavingAll ? 1 : 0.95 }}
-            className="bg-gradient-to-r from-matcha-primary to-matcha-light text-white font-outfit font-bold px-6 py-3 sm:px-8 sm:py-4 rounded-full shadow-xl text-base sm:text-lg inline-block disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            {isSavingAll ? "Saving..." : "Save, and See You!"}
-          </motion.button>
+            <motion.button
+              onClick={handleSaveAll}
+              disabled={isSavingAll}
+              whileHover={{ scale: isSavingAll ? 1 : 1.05 }}
+              whileTap={{ scale: isSavingAll ? 1 : 0.95 }}
+              className="bg-gradient-to-r from-gray-900 to-gray-800 text-white font-body font-bold px-8 py-4 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.3)] text-sm flex items-center gap-3 disabled:opacity-50 border border-gray-700"
+            >
+              {isSavingAll ? (
+                "Menyimpan..."
+              ) : (
+                <>
+                  <span>Save All Changes</span>
+                  <span className="text-lg">✨</span>
+                </>
+              )}
+            </motion.button>
+          </div>
         </motion.div>
       </div>
     </div>

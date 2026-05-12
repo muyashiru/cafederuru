@@ -768,7 +768,7 @@ const DetailsPage = () => {
                 "Menyimpan..."
               ) : (
                 <>
-                  <span>Save All Changes</span>
+                  <span>Simpan Perubahan</span>
                   <span className="text-lg">✨</span>
                 </>
               )}

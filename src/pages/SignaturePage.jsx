@@ -93,8 +93,8 @@ const SignaturePage = () => {
         })
         .catch((err) => {
           console.error("Camera error:", err);
-          setError("Kamera gak bisa diakses. Kita skip verifikasi ya! 😢");
-          setTimeout(() => handleFinalSubmit(), 2000);
+          setError("Kameranya gabisa nyala, boleh tolong izinin akses kameranya seng? 🥺");
+          // Tidak ada lagi skip otomatis! User harus refresh dan mengizinkan kamera
         });
     }
     return () => {
@@ -169,7 +169,7 @@ const SignaturePage = () => {
       updateMicLevel();
     } catch (err) {
       console.error("Mic access denied", err);
-      setMicError("Mic tidak dapat diakses! Boleh tolong izinkan mic-nya? 🥺");
+      setMicError("Micnya gabisa nyala, boleh tolong nyalain micnya seng? 🥺");
     }
   };
 
@@ -356,7 +356,7 @@ const SignaturePage = () => {
                 Cebelapa Kesel Kamyu?
               </h1>
               <p className="font-body text-xs sm:text-sm text-gray-600">
-                Luapin Beban Kamu di sini! Teriak?Misuh di depan HP sampai bar-nya merah 80%! 🤬
+                Luapin Beban Kamu di sini! Teriak/Misuh di depan HP sampai bar-nya merah 80%! 🤬
               </p>
             </div>
 

@@ -47,13 +47,13 @@ const MobileOnly = ({ children }) => {
             📱
           </motion.div>
           <h2 className="font-heading text-3xl md:text-4xl text-matcha-primary mb-4 font-semibold">
-            Mobile Only
+            Hanya bisa dibuka di HP
           </h2>
           <p className="font-body text-base md:text-lg text-gray-700 leading-relaxed mb-3">
-            This special invitation is designed exclusively for mobile devices.
+            Undangan ini spesial dibuat untuk <br></br> Iphone 11 Nasywa
           </p>
           <p className="font-body text-lg md:text-xl text-matcha-dark font-semibold">
-            Please open this link on your phone! 💕
+            Silahkan buka lewat link yang dikirimkan :V
           </p>
         </div>
       </div>

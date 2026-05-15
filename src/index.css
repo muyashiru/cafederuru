@@ -8,16 +8,16 @@
     body {
         @apply font-body bg-cream text-gray-800 antialiased overflow-x-hidden;
         background-image: 
-            radial-gradient(at 0% 0%, hsla(85,40%,85%,1) 0px, transparent 50%),
-            radial-gradient(at 100% 100%, hsla(38,50%,90%,1) 0px, transparent 50%),
-            radial-gradient(at 100% 0%, hsla(348,50%,90%,1) 0px, transparent 50%);
+            radial-gradient(at 0% 0%, hsla(45, 100%, 85%, 1) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, hsla(25, 100%, 80%, 1) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, hsla(15, 100%, 85%, 1) 0px, transparent 50%);
         background-attachment: fixed;
     }
 }
 
 @layer utilities {
-    .text-gradient-matcha {
-        @apply bg-gradient-to-br from-matcha-primary via-matcha-dark to-matcha-primary bg-clip-text text-transparent;
+    .text-gradient-sunset {
+        @apply bg-gradient-to-br from-sunset-primary via-sunset-dark to-sunset-primary bg-clip-text text-transparent;
     }
 
     .glass-panel {
@@ -29,11 +29,11 @@
     }
 
     .glass-input {
-        @apply bg-white/50 backdrop-blur-md border border-white/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-matcha-light/50 focus:border-matcha-light transition-all shadow-inner;
+        @apply bg-white/50 backdrop-blur-md border border-white/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-sunset-light/50 focus:border-sunset-light transition-all shadow-inner;
     }
     
-    .btn-matcha {
-        @apply bg-gradient-to-r from-matcha-primary to-matcha-light text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 shadow-matcha-primary/30 border border-matcha-light/30;
+    .btn-sunset {
+        @apply bg-gradient-to-r from-sunset-primary to-sunset-light text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 shadow-sunset-primary/30 border border-sunset-light/30;
     }
 
     .hide-scrollbar::-webkit-scrollbar {

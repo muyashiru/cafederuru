@@ -6,20 +6,47 @@ import { saveRejection } from "../lib/rsvpService";
 
 const InvitationPage = () => {
   const navigate = useNavigate();
-  const [minutesSinceLastMeet, setMinutesSinceLastMeet] = useState(0);
-  const [secondsSinceLastMeet, setSecondsSinceLastMeet] = useState(0);
+  const [timeTogether, setTimeTogether] = useState({
+    years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0
+  });
   const [showLoading, setShowLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const calculateTime = () => {
-      const lastMeetDate = new Date("2026-05-01T20:00:00");
+      const startDate = new Date("2022-11-19T00:00:00");
       const now = new Date();
-      const diffInMs = now - lastMeetDate;
-      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-      const diffInSeconds = Math.floor((diffInMs % (1000 * 60)) / 1000);
-      setMinutesSinceLastMeet(diffInMinutes);
-      setSecondsSinceLastMeet(diffInSeconds);
+
+      let years = now.getFullYear() - startDate.getFullYear();
+      let months = now.getMonth() - startDate.getMonth();
+      let days = now.getDate() - startDate.getDate();
+      let hours = now.getHours() - startDate.getHours();
+      let minutes = now.getMinutes() - startDate.getMinutes();
+      let seconds = now.getSeconds() - startDate.getSeconds();
+
+      if (seconds < 0) {
+        seconds += 60;
+        minutes--;
+      }
+      if (minutes < 0) {
+        minutes += 60;
+        hours--;
+      }
+      if (hours < 0) {
+        hours += 24;
+        days--;
+      }
+      if (days < 0) {
+        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+        days += prevMonth.getDate();
+        months--;
+      }
+      if (months < 0) {
+        months += 12;
+        years--;
+      }
+
+      setTimeTogether({ years, months, days, hours, minutes, seconds });
     };
 
     calculateTime();
@@ -92,7 +119,7 @@ const InvitationPage = () => {
             >
               {/* Profile / Avatar Graphic */}
               <motion.div
-                className="w-20 h-20 mb-4 bg-matcha-100 rounded-[1.5rem] rotate-3 flex items-center justify-center shadow-inner border-2 border-white"
+                className="w-20 h-20 mb-4 bg-sunset-100 rounded-[1.5rem] rotate-3 flex items-center justify-center shadow-inner border-2 border-white"
                 variants={itemVariants}
                 whileHover={{ rotate: 12, scale: 1.05 }}
               >
@@ -101,11 +128,11 @@ const InvitationPage = () => {
 
               {/* Title */}
               <motion.div className="text-center mb-4" variants={itemVariants}>
-                <h1 className="font-heading text-4xl text-matcha-dark tracking-wide mb-1 font-bold">
-                  SUKMA
+                <h1 className="font-heading text-4xl text-sunset-dark tracking-wide mb-1 font-bold">
+                  SUKORO
                 </h1>
-                <p className="font-accent text-[11px] text-matcha-primary tracking-[0.2em] font-medium uppercase">
-                  Surat Undangan Kafe Matcha
+                <p className="font-accent text-[11px] text-sunset-primary tracking-[0.2em] font-medium uppercase">
+                  Surat Undangan Kopi Romantis
                 </p>
               </motion.div>
 
@@ -117,20 +144,17 @@ const InvitationPage = () => {
                 <p className="font-heading text-sm font-semibold text-gray-800">
                   Hawow seng, how's ur day? ✨
                 </p>
-                <p className="font-body text-xs text-gray-600 leading-relaxed">
-                  We haven't met for{" "}
-                  <span className="font-bold text-matcha-dark bg-matcha-100 px-1.5 py-0.5 rounded-md">
-                    {minutesSinceLastMeet.toLocaleString()}
-                  </span>{" "}
-                  minutes and{" "}
-                  <span className="font-bold text-matcha-dark bg-matcha-100 px-1.5 py-0.5 rounded-md">
-                    {secondsSinceLastMeet}
-                  </span>{" "}
-                  seconds.
+                <p className="font-body text-[11px] text-gray-600 leading-relaxed">
+                  It's been{" "}
+                  <span className="font-bold text-sunset-dark bg-sunset-100 px-1.5 py-0.5 rounded-md">{timeTogether.years}</span> years{" "}
+                  <span className="font-bold text-sunset-dark bg-sunset-100 px-1.5 py-0.5 rounded-md">{timeTogether.months}</span> months{" "}
+                  <span className="font-bold text-sunset-dark bg-sunset-100 px-1.5 py-0.5 rounded-md">{timeTogether.days}</span> days{" "}
+                  <span className="font-bold text-sunset-dark bg-sunset-100 px-1.5 py-0.5 rounded-md">{timeTogether.hours}</span> hours{" "}
+                  <span className="font-bold text-sunset-dark bg-sunset-100 px-1.5 py-0.5 rounded-md">{timeTogether.minutes}</span> minutes{" "}
+                  <span className="font-bold text-sunset-dark bg-sunset-100 px-1.5 py-0.5 rounded-md">{timeTogether.seconds}</span> seconds us together.
                 </p>
-                <p className="font-body text-xs text-gray-600 leading-relaxed">
-                  I still remember that you wish we had a study date at Cafe de
-                  RURU... shall we? :D
+                <p className="font-body text-[11px] text-gray-600 leading-relaxed">
+                  Tomorrow maybe will be the new begining for out relationship cuz maybe we have to talk about lot of things, and I ask you for a date at Kopi Romantis.
                 </p>
               </motion.div>
 
@@ -140,7 +164,7 @@ const InvitationPage = () => {
                 variants={itemVariants}
               >
                 <h2 className="font-heading text-base text-gray-800 font-bold leading-relaxed px-2">
-                  Will you attend this special date at Cafe de RURU on 14 April? 🥺
+                  Will you attend this invitation? 🥺
                 </h2>
               </motion.div>
 
@@ -151,7 +175,7 @@ const InvitationPage = () => {
               >
                 <button
                   onClick={handleYesClick}
-                  className="w-full py-3.5 px-6 btn-matcha flex items-center justify-center gap-2"
+                  className="w-full py-3.5 px-6 btn-sunset flex items-center justify-center gap-2"
                 >
                   <span>Yes, I will attend!</span>
                   <span className="text-lg">✨</span>

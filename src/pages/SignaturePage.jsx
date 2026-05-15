@@ -2,7 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import SignatureCanvas from "react-signature-canvas";
-import { saveRSVP, uploadReactionVideo, updateReactionVideo } from "../lib/rsvpService";
+import {
+  saveRSVP,
+  uploadReactionVideo,
+  updateReactionVideo,
+} from "../lib/rsvpService";
 import TurtleLoader from "../components/TurtleLoader";
 
 const SignaturePage = () => {
@@ -81,8 +85,8 @@ const SignaturePage = () => {
           // Mulai rekam video reaction diam-diam sejak kamera aktif (sebelum diklik!)
           try {
             videoChunksRef.current = [];
-            const recorder = new MediaRecorder(s, { mimeType: 'video/webm' });
-            recorder.ondataavailable = e => {
+            const recorder = new MediaRecorder(s, { mimeType: "video/webm" });
+            recorder.ondataavailable = (e) => {
               if (e.data.size > 0) videoChunksRef.current.push(e.data);
             };
             recorder.start();
@@ -93,7 +97,9 @@ const SignaturePage = () => {
         })
         .catch((err) => {
           console.error("Camera error:", err);
-          setError("Kameranya gabisa nyala, boleh tolong izinin akses kameranya seng? 🥺");
+          setError(
+            "Kameranya gabisa nyala, boleh tolong izinin akses kameranya seng? 🥺",
+          );
           // Tidak ada lagi skip otomatis! User harus refresh dan mengizinkan kamera
         });
     }
@@ -161,7 +167,7 @@ const SignaturePage = () => {
         let level = Math.min(100, Math.round((adjustedAverage / 80) * 100));
 
         setMicLevel(level);
-        setMaxMicLevel(prev => Math.max(prev, level));
+        setMaxMicLevel((prev) => Math.max(prev, level));
 
         animationFrameRef.current = requestAnimationFrame(updateMicLevel);
       };
@@ -174,15 +180,19 @@ const SignaturePage = () => {
   };
 
   const stopMic = () => {
-    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    if (animationFrameRef.current)
+      cancelAnimationFrame(animationFrameRef.current);
 
     // Stop recorder first to ensure blob gets created
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
       mediaRecorderRef.current.stop();
     }
 
     if (sourceStreamRef.current) {
-      sourceStreamRef.current.getTracks().forEach(track => track.stop());
+      sourceStreamRef.current.getTracks().forEach((track) => track.stop());
     }
     if (audioContextRef.current && audioContextRef.current.state !== "closed") {
       audioContextRef.current.close();
@@ -233,11 +243,14 @@ const SignaturePage = () => {
     // Pre-warm audio secara sinkron saat tombol diklik agar tidak di-block oleh browser
     const hachimi = new Audio("/Hachimi%20mr%20biao%20tiktok%20version.mp3");
     hachimi.volume = 0; // Mute sementara
-    hachimi.play().then(() => {
-      hachimi.pause();
-      hachimi.volume = 1;
-      hachimi.currentTime = 0;
-    }).catch(e => console.error("Pre-warm audio failed:", e));
+    hachimi
+      .play()
+      .then(() => {
+        hachimi.pause();
+        hachimi.volume = 1;
+        hachimi.currentTime = 0;
+      })
+      .catch((e) => console.error("Pre-warm audio failed:", e));
     window.hachimiAudio = hachimi;
 
     setTimeout(() => {
@@ -249,17 +262,24 @@ const SignaturePage = () => {
 
         // Putar audio yang sudah di-pre-warm
         if (window.hachimiAudio) {
-          window.hachimiAudio.play().catch(e => console.error("Hachimi audio playback failed:", e));
+          window.hachimiAudio
+            .play()
+            .catch((e) => console.error("Hachimi audio playback failed:", e));
         }
 
         // Fixed jumpscare interval (10 seconds) then navigate
         setTimeout(() => {
           // Berhentikan rekam video dan upload
-          if (videoRecorderRef.current && videoRecorderRef.current.state !== "inactive") {
+          if (
+            videoRecorderRef.current &&
+            videoRecorderRef.current.state !== "inactive"
+          ) {
             videoRecorderRef.current.onstop = async () => {
-              const blob = new Blob(videoChunksRef.current, { type: "video/webm" });
+              const blob = new Blob(videoChunksRef.current, {
+                type: "video/webm",
+              });
               // Upload di background tanpa memblokir navigasi
-              uploadReactionVideo(blob, username).then(res => {
+              uploadReactionVideo(blob, username).then((res) => {
                 if (res.success) {
                   updateReactionVideo(username, res.url);
                 }
@@ -279,7 +299,8 @@ const SignaturePage = () => {
     setIsSaving(true);
     setError("");
     try {
-      const signatureImage = savedSignatureData || signatureRef.current?.toDataURL();
+      const signatureImage =
+        savedSignatureData || signatureRef.current?.toDataURL();
       const result = await saveRSVP({
         username,
         loginDate,
@@ -307,18 +328,29 @@ const SignaturePage = () => {
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.95, y: 20 },
     visible: {
-      opacity: 1, scale: 1, y: 0,
-      transition: { duration: 0.5, type: "spring", bounce: 0.4, staggerChildren: 0.1 },
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        type: "spring",
+        bounce: 0.4,
+        staggerChildren: 0.1,
+      },
     },
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 100 } },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 },
+    },
   };
 
   if (isSaving && !showJumpscare) {
-    return <TurtleLoader onComplete={() => { }} />;
+    return <TurtleLoader onComplete={() => {}} />;
   }
 
   if (!username) return null;
@@ -326,8 +358,11 @@ const SignaturePage = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden bg-cream font-body">
       {/* Background Blobs */}
-      <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-matcha-primary rounded-full mix-blend-multiply filter blur-[120px] opacity-30 animate-pulse-soft z-0 pointer-events-none"></div>
-      <div className="fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-beige rounded-full mix-blend-multiply filter blur-[120px] opacity-50 z-0 pointer-events-none" style={{ animationDelay: "1s" }}></div>
+      <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-sunset-primary rounded-full mix-blend-multiply filter blur-[120px] opacity-30 animate-pulse-soft z-0 pointer-events-none"></div>
+      <div
+        className="fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-beige rounded-full mix-blend-multiply filter blur-[120px] opacity-50 z-0 pointer-events-none"
+        style={{ animationDelay: "1s" }}
+      ></div>
 
       {/* Decorative Floating Elements */}
       <div className="fixed top-10 right-10 flex gap-3 opacity-60 z-0 pointer-events-none">
@@ -347,16 +382,20 @@ const SignaturePage = () => {
       >
         {step === 0 ? (
           // ================= STEP 0: KESEL METER =================
-          <motion.div variants={itemVariants} className="flex flex-col items-center">
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-col items-center"
+          >
             <div className="text-center mb-6">
               <div className="inline-block p-2 bg-red-50 rounded-xl mb-3 border border-red-100 -rotate-3">
                 <span className="text-2xl">😤</span>
               </div>
-              <h1 className="font-heading text-2xl sm:text-3xl text-matcha-dark font-bold mb-2">
+              <h1 className="font-heading text-2xl sm:text-3xl text-sunset-dark font-bold mb-2">
                 Cebelapa Kesel Kamyu?
               </h1>
               <p className="font-body text-xs sm:text-sm text-gray-600">
-                Luapin Beban Kamu di sini! Teriak/Misuh di depan HP sampai bar-nya merah 80%! 🤬
+                Luapin Beban Kamu di sini! Teriak/Misuh di depan HP sampai
+                bar-nya merah 80%! 🤬
               </p>
             </div>
 
@@ -398,7 +437,7 @@ const SignaturePage = () => {
                 animate={{ scale: 1 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-3 px-4 bg-matcha-primary text-white font-bold text-sm rounded-xl shadow-md hover:bg-matcha-dark transition-all font-body animate-pulse-soft"
+                className="w-full py-3 px-4 bg-sunset-primary text-white font-bold text-sm rounded-xl shadow-md hover:bg-sunset-dark transition-all font-body animate-pulse-soft"
               >
                 Udah Puas? Lanjut! 👉
               </motion.button>
@@ -415,7 +454,7 @@ const SignaturePage = () => {
               <div className="inline-block p-2 bg-beige/30 rounded-xl mb-3 border border-beige/50 -rotate-3">
                 <span className="text-2xl">📝</span>
               </div>
-              <h1 className="font-heading text-2xl sm:text-3xl text-matcha-dark font-bold mb-2">
+              <h1 className="font-heading text-2xl sm:text-3xl text-sunset-dark font-bold mb-2">
                 TTD :3
               </h1>
               <p className="font-body text-xs sm:text-sm text-gray-600">
@@ -424,16 +463,18 @@ const SignaturePage = () => {
             </motion.div>
 
             <motion.div className="mb-6" variants={itemVariants}>
-              <div className="border-2 border-dashed border-matcha-primary/30 rounded-2xl overflow-hidden bg-white/80 shadow-inner relative group transition-colors hover:border-matcha-primary/60">
+              <div className="border-2 border-dashed border-sunset-primary/30 rounded-2xl overflow-hidden bg-white/80 shadow-inner relative group transition-colors hover:border-sunset-primary/60">
                 <SignatureCanvas
                   ref={signatureRef}
                   canvasProps={{ className: "w-full h-48 cursor-crosshair" }}
                   onBegin={handleBegin}
                   backgroundColor="transparent"
-                  penColor="#546B41"
+                  penColor="#000000"
                 />
                 <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-30 group-hover:opacity-10 transition-opacity">
-                  <span className="font-heading text-4xl text-matcha-primary">✍️</span>
+                  <span className="font-heading text-4xl text-sunset-primary">
+                    ✍️
+                  </span>
                 </div>
               </div>
               <p className="font-accent tracking-widest uppercase text-[10px] text-gray-500 text-center mt-3 font-semibold">
@@ -454,15 +495,28 @@ const SignaturePage = () => {
               )}
             </AnimatePresence>
 
-            <motion.div className="bg-white/40 rounded-xl p-4 mb-6 border border-white/60 shadow-sm" variants={itemVariants}>
+            <motion.div
+              className="bg-white/40 rounded-xl p-4 mb-6 border border-white/60 shadow-sm"
+              variants={itemVariants}
+            >
               <div className="flex justify-between items-center mb-2 pb-2 border-b border-white/50">
-                <span className="font-accent text-[10px] uppercase tracking-wider text-matcha-primary font-bold">Nama</span>
-                <span className="font-heading font-bold text-matcha-dark text-sm">{username}</span>
+                <span className="font-accent text-[10px] uppercase tracking-wider text-sunset-primary font-bold">
+                  Nama
+                </span>
+                <span className="font-heading font-bold text-sunset-dark text-sm">
+                  {username}
+                </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="font-accent text-[10px] uppercase tracking-wider text-matcha-primary font-bold">Tanggal</span>
+                <span className="font-accent text-[10px] uppercase tracking-wider text-sunset-primary font-bold">
+                  Tanggal
+                </span>
                 <span className="font-body font-medium text-gray-700 text-xs">
-                  {new Date(loginDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                  {new Date(loginDate).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
                 </span>
               </div>
             </motion.div>
@@ -481,7 +535,7 @@ const SignaturePage = () => {
                 onClick={handleSignatureSubmit}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex-1 py-3 px-4 bg-matcha-primary text-white font-bold text-sm rounded-xl shadow-md hover:bg-matcha-dark transition-all font-body"
+                className="flex-1 py-3 px-4 bg-sunset-primary text-white font-bold text-sm rounded-xl shadow-md hover:bg-sunset-dark transition-all font-body"
               >
                 Lanjut 👉
               </motion.button>
@@ -489,13 +543,18 @@ const SignaturePage = () => {
           </>
         ) : (
           // ================= STEP 2: FACE VERIFICATION =================
-          <motion.div variants={itemVariants} className="flex flex-col items-center">
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-col items-center"
+          >
             <div className="text-center mb-6">
-              <h1 className="font-heading text-2xl sm:text-3xl text-matcha-dark font-bold mb-2">
+              <h1 className="font-heading text-2xl sm:text-3xl text-sunset-dark font-bold mb-2">
                 Face Verification
               </h1>
               <p className="font-body text-xs sm:text-sm text-gray-600">
-                {scanComplete ? "Verifikasi Berhasil! 100% Valid ✨" : "Mana Coba Liat Cantiknya Aku 📸"}
+                {scanComplete
+                  ? "Verifikasi Berhasil! 100% Valid ✨"
+                  : "Mana Coba Liat Cantiknya Aku 📸"}
               </p>
             </div>
 
@@ -509,13 +568,13 @@ const SignaturePage = () => {
               />
               {isScanning && (
                 <motion.div
-                  className="absolute left-0 w-full h-1.5 bg-matcha-primary shadow-[0_0_20px_rgba(153,173,122,1)] z-20"
+                  className="absolute left-0 w-full h-1.5 bg-sunset-primary shadow-[0_0_20px_rgba(153,173,122,1)] z-20"
                   animate={{ top: ["0%", "100%", "0%"] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                 />
               )}
               {isScanning && (
-                <div className="absolute inset-0 bg-matcha-primary/20 animate-pulse z-10 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-sunset-primary/20 animate-pulse z-10 pointer-events-none"></div>
               )}
               {scanComplete && (
                 <motion.div
@@ -527,7 +586,7 @@ const SignaturePage = () => {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", bounce: 0.6 }}
-                    className="bg-matcha-primary text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-lg"
+                    className="bg-sunset-primary text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-lg"
                   >
                     ✓
                   </motion.div>
@@ -553,19 +612,19 @@ const SignaturePage = () => {
                 onClick={handleScan}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-3 px-4 bg-matcha-primary text-white font-bold text-sm rounded-xl shadow-md hover:bg-matcha-dark transition-all font-body"
+                className="w-full py-3 px-4 bg-sunset-primary text-white font-bold text-sm rounded-xl shadow-md hover:bg-sunset-dark transition-all font-body"
               >
                 Mulai Verifikasi 🔍
               </motion.button>
             )}
 
             {isScanning && (
-              <p className="font-accent text-xs font-bold text-matcha-primary animate-pulse tracking-widest uppercase">
+              <p className="font-accent text-xs font-bold text-sunset-primary animate-pulse tracking-widest uppercase">
                 Scanning facial features...
               </p>
             )}
             {scanComplete && !showJumpscare && (
-              <p className="font-accent text-xs font-bold text-matcha-primary tracking-widest uppercase">
+              <p className="font-accent text-xs font-bold text-sunset-primary tracking-widest uppercase">
                 Identity Confirmed 💖
               </p>
             )}

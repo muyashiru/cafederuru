@@ -7,19 +7,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        matcha: {
-          50: '#F4F7EF',
-          100: '#E2EBD5',
-          200: '#CBE0B4',
-          300: '#ABCBA0',
-          primary: '#99AD7A', // 2nd color (Light Matcha)
-          light: '#B3C49C',
-          dark: '#546B41',    // 1st color (Dark Matcha)
+        sunset: {
+          50: '#FFFBDA',
+          100: '#FFEC9E',
+          200: '#FDE49B',
+          300: '#FCD972',
+          primary: '#FFBB70', 
+          light: '#FFC88A',
+          dark: '#ED9455',    
         },
-        cream: '#FFF8EC',     // 4th color (Cream)
-        beige: '#DCCCAC',     // 3rd color (Beige)
-        softpink: '#FFD1DC',
-        peach: '#FFDAB9',
+        cream: '#FFFBDA',     
+        beige: '#FFEC9E',     
+        softpink: '#FFBB70',
+        peach: '#ED9455',
         glass: 'rgba(255, 255, 255, 0.65)',
       },
       fontFamily: {
@@ -28,8 +28,8 @@ export default {
         accent: ['Outfit', 'sans-serif'],
       },
       boxShadow: {
-        'glass': '0 8px 32px 0 rgba(136, 176, 75, 0.15)',
-        'glass-hover': '0 12px 40px 0 rgba(136, 176, 75, 0.25)',
+        'glass': '0 8px 32px 0 rgba(237, 148, 85, 0.15)',
+        'glass-hover': '0 12px 40px 0 rgba(237, 148, 85, 0.25)',
         'glass-inset': 'inset 0 2px 4px 0 rgba(255, 255, 255, 0.4)',
       },
       animation: {

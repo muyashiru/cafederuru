@@ -35,7 +35,7 @@ const TurtleLoader = ({ onComplete }) => {
         </motion.div>
       </motion.div>
       <motion.p
-        className="absolute bottom-[30%] font-body text-base md:text-lg text-matcha-dark font-semibold tracking-wide"
+        className="absolute bottom-[30%] font-body text-base md:text-lg text-sunset-dark font-semibold tracking-wide"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}

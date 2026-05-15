@@ -92,7 +92,7 @@ Modify `BENEFITS` array in `DetailsPage.jsx` (lines 23-67)
 ```
 07:00 - 🚗 Jemput di tempat
 07:40 - ☕ Arrive at Cafe de RURU
-08:00 - 📚 Nuggas Session 1 (Focus Time)
+08:00 - 📚 Nugas Session 1 + Deep talk(Focus Time)
 11:30 - 📸 Photo Session & Break
 12:00 - 🕌 Shalat Dzuhur
 12:30 - 🍽️ Lunch Break

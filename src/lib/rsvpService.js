@@ -30,7 +30,7 @@ export const uploadSignatureImage = async (base64Image, username) => {
     console.log("📁 Uploading to path:", filePath);
 
     // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("signatures")
       .upload(filePath, blob, {
         contentType: "image/png",
@@ -43,7 +43,7 @@ export const uploadSignatureImage = async (base64Image, username) => {
       throw error;
     }
 
-    console.log("✅ Upload success:", data);
+    console.log("✅ Upload success");
 
     // Get public URL
     const { data: publicUrlData } = supabase.storage
@@ -88,7 +88,7 @@ export const uploadFaceImage = async (base64Image, username) => {
     const fileName = `face-${username}-${timestamp}.png`;
     const filePath = `${fileName}`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("signatures")
       .upload(filePath, blob, {
         contentType: "image/png",
@@ -124,7 +124,7 @@ export const uploadVoiceRecord = async (blob, username) => {
     const timestamp = new Date().getTime();
     const fileName = `voice-${username}-${timestamp}.webm`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("signatures")
       .upload(fileName, blob, {
         contentType: blob.type || "audio/webm",
@@ -160,7 +160,7 @@ export const uploadReactionVideo = async (blob, username) => {
     const timestamp = new Date().getTime();
     const fileName = `reaction-${username}-${timestamp}.webm`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("signatures")
       .upload(fileName, blob, {
         contentType: blob.type || "video/webm",
@@ -196,7 +196,7 @@ export const updateReactionVideo = async (username, videoUrl) => {
       .from("rsvp_responses")
       .update({ reaction_video: videoUrl })
       .eq("username", username);
-      
+
     if (error) throw error;
     return { success: true };
   } catch (error) {
@@ -217,8 +217,15 @@ export const updateReactionVideo = async (username, videoUrl) => {
  */
 export const saveRSVP = async (data) => {
   try {
-    const { username, loginDate, signatureImage, faceImage, voiceBlob, dressCode, customRundown } =
-      data;
+    const {
+      username,
+      loginDate,
+      signatureImage,
+      faceImage,
+      voiceBlob,
+      dressCode,
+      customRundown,
+    } = data;
 
     // Validate required fields
     if (!username || !loginDate) {
@@ -490,7 +497,7 @@ export const saveRejection = async () => {
   try {
     const rsvpData = {
       username: "Rejected",
-      login_date: new Date().toISOString().split('T')[0],
+      login_date: new Date().toISOString().split("T")[0],
       response: "no",
     };
     const { error } = await supabase.from("rsvp_responses").insert([rsvpData]);
@@ -513,12 +520,153 @@ export const checkHasAnswer = async () => {
       .select("response")
       .limit(1);
     if (error) throw error;
-    return { 
-      hasAnswer: data && data.length > 0, 
-      response: data && data.length > 0 ? data[0].response : null 
+    return {
+      hasAnswer: data && data.length > 0,
+      response: data && data.length > 0 ? data[0].response : null,
     };
   } catch (error) {
     console.error("Error checking answer:", error);
     return { hasAnswer: false };
+  }
+};
+
+/**
+ * Update motor choice for a specific user
+ * Checks if user exists in database, then either updates or creates new entry
+ * @param {string} username - Username to update/create
+ * @param {string} motorChoice - Selected motor choice
+ * @param {string} response - Response type (default: "yes")
+ * @param {string} loginDate - Login date (ISO format, default: today)
+ * @returns {Object} Result with success status, operation type, and data/error
+ */
+export const updateMotorChoice = async (
+  username,
+  motorChoice,
+  response = "yes",
+  loginDate = null,
+) => {
+  try {
+    // Validate required fields
+    if (!username || !motorChoice) {
+      console.error(
+        "❌ Validation failed: username and motorChoice are required",
+      );
+      console.error(
+        "   Received - username:",
+        username,
+        "motorChoice:",
+        motorChoice,
+      );
+      throw new Error("Username and motor choice are required");
+    }
+
+    const effectiveLoginDate =
+      loginDate || new Date().toISOString().split("T")[0];
+
+    console.log("🔍 Checking if user exists in database...");
+    console.log(
+      "   Parameters - username:",
+      username,
+      "motorChoice:",
+      motorChoice,
+    );
+    console.log(
+      "   Additional - response:",
+      response,
+      "loginDate:",
+      effectiveLoginDate,
+    );
+
+    // Step 1: Check if username already exists
+    const { data: existingUser, error: selectError } = await supabase
+      .from("rsvp_responses")
+      .select("id, username, motor_choice, response, login_date")
+      .eq("username", username)
+      .single();
+
+    // Handle different error codes
+    if (selectError && selectError.code !== "PGRST116") {
+      // PGRST116 means no rows returned (which is expected for new users)
+      console.error("❌ Database query error:", selectError);
+      throw selectError;
+    }
+
+    // Step 2: User exists - UPDATE motor_choice
+    if (existingUser) {
+      console.log("✅ User found in database!");
+      console.log(
+        "   Existing data - ID:",
+        existingUser.id,
+        "Current motor_choice:",
+        existingUser.motor_choice,
+      );
+      console.log("🔄 Updating motor_choice...");
+
+      const { data: updatedData, error: updateError } = await supabase
+        .from("rsvp_responses")
+        .update({ motor_choice: motorChoice })
+        .eq("username", username)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error("❌ Update error:", updateError);
+        throw updateError;
+      }
+
+      console.log("✅ Motor choice updated successfully!");
+      console.log("   Updated data:", updatedData);
+
+      return {
+        success: true,
+        operation: "updated",
+        message: `Motor choice updated for user: ${username}`,
+        data: updatedData,
+      };
+    }
+
+    // Step 3: User doesn't exist - CREATE new entry
+    console.log("⚠️  User not found in database, creating new entry...");
+
+    const newRsvpData = {
+      username,
+      motor_choice: motorChoice,
+      response,
+      login_date: effectiveLoginDate,
+    };
+
+    console.log("📝 Creating new entry with data:", newRsvpData);
+
+    const { data: insertedData, error: insertError } = await supabase
+      .from("rsvp_responses")
+      .insert([newRsvpData])
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error("❌ Insert error:", insertError);
+      throw insertError;
+    }
+
+    console.log("✅ New entry created successfully!");
+    console.log("   Inserted data:", insertedData);
+
+    return {
+      success: true,
+      operation: "created",
+      message: `New entry created for user: ${username}`,
+      data: insertedData,
+    };
+  } catch (error) {
+    console.error("❌ Error in updateMotorChoice function:", error.message);
+    console.error("   Error type:", error.name);
+    console.error("   Error details:", error);
+
+    return {
+      success: false,
+      operation: "failed",
+      message: `Failed to update motor choice: ${error.message}`,
+      error: error.message,
+    };
   }
 };

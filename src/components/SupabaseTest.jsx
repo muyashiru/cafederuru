@@ -49,8 +49,8 @@ const SupabaseTest = () => {
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md border-2 border-matcha-light">
-        <h3 className="font-heading text-xl font-semibold text-matcha-dark mb-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md border-2 border-sunset-light">
+        <h3 className="font-heading text-xl font-semibold text-sunset-dark mb-4">
           🧪 Supabase Test
         </h3>
 
@@ -60,7 +60,7 @@ const SupabaseTest = () => {
           className={`w-full py-3 px-6 rounded-xl font-semibold text-white transition-all ${
             status === 'testing'
               ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-gradient-to-r from-matcha-primary to-matcha-light hover:shadow-lg'
+              : 'bg-gradient-to-r from-sunset-primary to-sunset-light hover:shadow-lg'
           }`}
         >
           {status === 'testing' ? 'Testing...' : 'Test Connection'}

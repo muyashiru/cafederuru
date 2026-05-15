@@ -10,6 +10,7 @@ import MobileOnly from "./components/MobileOnly";
 import TurtleLoader from "./components/TurtleLoader";
 import InvitationPage from "./pages/InvitationPage";
 import LoginPage from "./pages/LoginPage";
+import MotorChoicePage from "./pages/MotorChoicePage";
 import SignaturePage from "./pages/SignaturePage";
 import GoodbyePage from "./pages/GoodbyePage";
 import DetailsPage from "./pages/DetailsPage";
@@ -25,7 +26,7 @@ function App() {
     let timer;
     const init = async () => {
       const status = await checkHasAnswer();
-      if (status.hasAnswer && status.response === 'no') {
+      if (status.hasAnswer && status.response === "no") {
         setIsRejected(true);
         setIsLoading(false); // Langsung skip loading
       } else {
@@ -60,9 +61,28 @@ function App() {
                 </>
               ) : (
                 <>
-                  <Route path="/" element={hasYes ? <Navigate to="/login" replace /> : <InvitationPage />} />
+                  <Route
+                    path="/"
+                    element={
+                      hasYes ? (
+                        <Navigate to="/login" replace />
+                      ) : (
+                        <InvitationPage />
+                      )
+                    }
+                  />
                   <Route path="/login" element={<LoginPage />} />
-                  <Route path="/signature" element={hasYes ? <Navigate to="/details" replace /> : <SignaturePage />} />
+                  <Route path="/motor-choice" element={<MotorChoicePage />} />
+                  <Route
+                    path="/signature"
+                    element={
+                      hasYes ? (
+                        <Navigate to="/details" replace />
+                      ) : (
+                        <SignaturePage />
+                      )
+                    }
+                  />
                   <Route path="/goodbye" element={<GoodbyePage />} />
                   <Route path="/details" element={<DetailsPage />} />
                   <Route path="/blank" element={<BlankPage />} />

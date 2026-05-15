@@ -74,7 +74,7 @@ const LoginPage = () => {
     }
 
     setTimeout(() => {
-      navigate("/signature", {
+      navigate("/motor-choice", {
         state: {
           username: selectedUsername?.label,
           loginDate: selectedDate,
@@ -107,19 +107,24 @@ const LoginPage = () => {
     visible: {
       y: 0,
       opacity: 1,
-      transition: { type: "spring", stiffness: 120 }
+      transition: { type: "spring", stiffness: 120 },
     },
   };
 
   return (
     <div className="h-screen w-full flex flex-col items-center justify-center p-5 relative overflow-hidden">
       {/* Decorative Background */}
-      <div className="absolute top-1/4 right-8 opacity-60 animate-float z-0 text-3xl">🔐</div>
-      <div className="absolute bottom-1/4 left-8 opacity-50 animate-float-delayed z-0 text-3xl">💕</div>
+      <div className="absolute top-1/4 right-8 opacity-60 animate-float z-0 text-3xl">
+        🔐
+      </div>
+      <div className="absolute bottom-1/4 left-8 opacity-50 animate-float-delayed z-0 text-3xl">
+        💕
+      </div>
 
       <motion.div
-        className={`max-w-[380px] w-full glass-panel px-6 py-8 relative z-10 ${isShaking ? "animate-[shake_0.5s_ease-in-out]" : ""
-          }`}
+        className={`max-w-[380px] w-full glass-panel px-6 py-8 relative z-10 ${
+          isShaking ? "animate-[shake_0.5s_ease-in-out]" : ""
+        }`}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -129,7 +134,7 @@ const LoginPage = () => {
           <div className="w-16 h-16 mx-auto mb-3 bg-white/50 rounded-full flex items-center justify-center border border-white shadow-sm">
             <span className="text-3xl">🕵🏻‍♀️</span>
           </div>
-          <h1 className="font-heading text-2xl text-matcha-dark font-bold mb-1">
+          <h1 className="font-heading text-2xl text-sunset-dark font-bold mb-1">
             Siapa nih yang login?
           </h1>
           <p className="font-body text-xs text-gray-500 font-medium tracking-wide">
@@ -145,7 +150,7 @@ const LoginPage = () => {
         >
           {/* Username Dropdown */}
           <div className="space-y-2">
-            <label className="block font-body text-xs font-bold text-matcha-dark/80 uppercase tracking-wider ml-1">
+            <label className="block font-body text-xs font-bold text-sunset-dark/80 uppercase tracking-wider ml-1">
               Nama Kamu
             </label>
             <Listbox value={selectedUsername} onChange={setSelectedUsername}>
@@ -154,11 +159,23 @@ const LoginPage = () => {
                   <span
                     className={`block truncate ${selectedUsername ? "text-gray-800 font-medium" : "text-gray-400"}`}
                   >
-                    {selectedUsername ? selectedUsername.label : "Pilih identitas..."}
+                    {selectedUsername
+                      ? selectedUsername.label
+                      : "Pilih identitas..."}
                   </span>
-                  <span className="pointer-events-none flex items-center text-matcha-primary group-hover:text-matcha-dark transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <span className="pointer-events-none flex items-center text-sunset-primary group-hover:text-sunset-dark transition-colors">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </span>
                 </Listbox.Button>
@@ -169,12 +186,17 @@ const LoginPage = () => {
                         key={option.value}
                         value={option}
                         className={({ active }) =>
-                          `cursor-pointer select-none relative py-3 px-4 text-sm transition-colors border-b border-gray-100 last:border-0 ${active ? "bg-matcha-50 text-matcha-dark" : "text-gray-700 hover:bg-gray-50"
+                          `cursor-pointer select-none relative py-3 px-4 text-sm transition-colors border-b border-gray-100 last:border-0 ${
+                            active
+                              ? "bg-sunset-50 text-sunset-dark"
+                              : "text-gray-700 hover:bg-gray-50"
                           }`
                         }
                       >
                         {({ selected }) => (
-                          <span className={`block truncate ${selected ? "font-bold text-matcha-dark" : "font-normal"}`}>
+                          <span
+                            className={`block truncate ${selected ? "font-bold text-sunset-dark" : "font-normal"}`}
+                          >
                             {option.label}
                           </span>
                         )}
@@ -190,9 +212,9 @@ const LoginPage = () => {
           <div className="space-y-2 relative z-10">
             <label
               htmlFor="date"
-              className="block font-body text-xs font-bold text-matcha-dark/80 uppercase tracking-wider ml-1"
+              className="block font-body text-[10px] font-bold text-sunset-dark/80 uppercase tracking-wider ml-1"
             >
-              Terakhir Ketemu
+              When did the last time we kisses?
             </label>
             <DatePicker
               id="date"
@@ -228,11 +250,21 @@ const LoginPage = () => {
             type="submit"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full font-body font-bold text-sm py-4 px-6 btn-matcha flex items-center justify-center gap-2 mt-4"
+            className="w-full font-body font-bold text-sm py-4 px-6 btn-sunset flex items-center justify-center gap-2 mt-4"
           >
             <span>Login Bang</span>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              />
             </svg>
           </motion.button>
         </motion.form>

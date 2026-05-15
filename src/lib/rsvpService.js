@@ -122,12 +122,13 @@ export const uploadVoiceRecord = async (blob, username) => {
   try {
     console.log("🚀 Starting voice upload for:", username);
     const timestamp = new Date().getTime();
-    const fileName = `voice-${username}-${timestamp}.webm`;
+    const extension = blob.type && blob.type.includes("mp4") ? "mp4" : "webm";
+    const fileName = `voice-${username}-${timestamp}.${extension}`;
 
     const { error } = await supabase.storage
       .from("signatures")
       .upload(fileName, blob, {
-        contentType: blob.type || "audio/webm",
+        contentType: blob.type || `audio/${extension}`,
         cacheControl: "3600",
         upsert: false,
       });
@@ -158,12 +159,13 @@ export const uploadReactionVideo = async (blob, username) => {
   try {
     console.log("🚀 Starting video upload for:", username);
     const timestamp = new Date().getTime();
-    const fileName = `reaction-${username}-${timestamp}.webm`;
+    const extension = blob.type && blob.type.includes("mp4") ? "mp4" : "webm";
+    const fileName = `reaction-${username}-${timestamp}.${extension}`;
 
     const { error } = await supabase.storage
       .from("signatures")
       .upload(fileName, blob, {
-        contentType: blob.type || "video/webm",
+        contentType: blob.type || `video/${extension}`,
         cacheControl: "3600",
         upsert: false,
       });
@@ -192,10 +194,20 @@ export const uploadReactionVideo = async (blob, username) => {
  */
 export const updateReactionVideo = async (username, videoUrl) => {
   try {
+    const { data: existingUser } = await supabase
+      .from("rsvp_responses")
+      .select("id")
+      .eq("username", username)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!existingUser) throw new Error("User not found");
+
     const { error } = await supabase
       .from("rsvp_responses")
       .update({ reaction_video: videoUrl })
-      .eq("username", username);
+      .eq("id", existingUser.id);
 
     if (error) throw error;
     return { success: true };
@@ -291,10 +303,21 @@ export const saveRSVP = async (data) => {
     console.log("📝 Updating RSVP for username:", username);
     console.log("   Data to update:", rsvpData);
 
+    // Fetch latest entry ID
+    const { data: existingUser } = await supabase
+      .from("rsvp_responses")
+      .select("id")
+      .eq("username", username)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!existingUser) throw new Error("No existing RSVP found to update");
+
     const { data: updatedData, error } = await supabase
       .from("rsvp_responses")
       .update(rsvpData)
-      .eq("username", username)
+      .eq("id", existingUser.id)
       .select()
       .single();
 
@@ -354,17 +377,16 @@ export const checkExistingRSVP = async (username) => {
     const { data, error } = await supabase
       .from("rsvp_responses")
       .select("id")
-      .eq("username", username)
-      .single();
+      .eq("username", username);
 
-    if (error && error.code !== "PGRST116") {
-      // PGRST116 = no rows returned (expected)
+    if (error) {
       throw error;
     }
 
     return {
       success: true,
-      exists: !!data,
+      exists: data && data.length > 0,
+      count: data ? data.length : 0,
     };
   } catch (error) {
     console.error("Error checking existing RSVP:", error);
@@ -383,10 +405,20 @@ export const checkExistingRSVP = async (username) => {
  */
 export const updateDressCode = async (username, dressCode) => {
   try {
+    const { data: existingUser } = await supabase
+      .from("rsvp_responses")
+      .select("id")
+      .eq("username", username)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!existingUser) throw new Error("User not found");
+
     const { data, error } = await supabase
       .from("rsvp_responses")
       .update({ dress_code: dressCode })
-      .eq("username", username)
+      .eq("id", existingUser.id)
       .select()
       .single();
 
@@ -413,10 +445,20 @@ export const updateDressCode = async (username, dressCode) => {
  */
 export const updateCustomRundown = async (username, customRundown) => {
   try {
+    const { data: existingUser } = await supabase
+      .from("rsvp_responses")
+      .select("id")
+      .eq("username", username)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!existingUser) throw new Error("User not found");
+
     const { data, error } = await supabase
       .from("rsvp_responses")
       .update({ custom_rundown: customRundown })
-      .eq("username", username)
+      .eq("id", existingUser.id)
       .select()
       .single();
 
@@ -588,9 +630,10 @@ export const updateMotorChoice = async (
       .from("rsvp_responses")
       .select("id, username, motor_choice, response, login_date")
       .eq("username", username)
+      .order("created_at", { ascending: false })
+      .limit(1)
       .single();
 
-    // Handle different error codes
     if (selectError && selectError.code !== "PGRST116") {
       // PGRST116 means no rows returned (which is expected for new users)
       console.error("❌ Database query error:", selectError);
@@ -688,23 +731,21 @@ export const createRSVPEntry = async ({ username, loginDate }) => {
     console.log("🚀 Creating new RSVP entry for:", username);
     console.log("   Login date:", loginDate);
 
-    // Check if username already exists to prevent duplicates
+    // Check how many entries this username has
     const { data: existingData, error: checkError } = await supabase
       .from("rsvp_responses")
       .select("id")
-      .eq("username", username)
-      .single();
+      .eq("username", username);
 
-    if (checkError && checkError.code !== "PGRST116") {
-      // PGRST116 = no rows returned (which is what we want)
+    if (checkError) {
       throw checkError;
     }
 
-    if (existingData) {
-      console.log("⚠️ Username already exists:", username);
+    if (existingData && existingData.length >= 2) {
+      console.log("⚠️ Username already has max entries (2):", username);
       return {
         success: false,
-        error: `Username "${username}" already exists in RSVP responses`,
+        error: `Username "${username}" has reached the maximum of 2 RSVP entries`,
         isDuplicate: true,
       };
     }
@@ -820,7 +861,17 @@ export const updateMotorChoiceOnly = async (username, motorChoice) => {
     const { data: updatedData, error: updateError } = await supabase
       .from("rsvp_responses")
       .update({ motor_choice: motorChoice })
-      .eq("username", username)
+      .in(
+        "id",
+        (
+          await supabase
+            .from("rsvp_responses")
+            .select("id")
+            .eq("username", username)
+            .order("created_at", { ascending: false })
+            .limit(1)
+        ).data?.map((d) => d.id) || [],
+      )
       .select()
       .single();
 

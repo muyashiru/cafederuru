@@ -204,17 +204,26 @@ const DetailsPage = () => {
 
   const handleDressCodeChange = (e) => {
     const value = e.target.value;
+    console.log("👗 Dress code selected:", value);
     setSelectedDressCode(value);
   };
 
   const handleSaveDressCode = async () => {
     if (selectedDressCode) {
       setIsSavingDress(true);
-      const result = await updateDressCode(username, selectedDressCode);
-      if (result.success) {
-        console.log("Dress code saved!");
+      try {
+        console.log("💾 Saving dress code:", selectedDressCode);
+        const result = await updateDressCode(username, selectedDressCode);
+        if (result.success) {
+          console.log("✅ Dress code saved!");
+        } else {
+          throw new Error(result.error || "Failed to save dress code");
+        }
+      } catch (error) {
+        console.error("❌ Error saving dress code:", error);
+      } finally {
+        setIsSavingDress(false);
       }
-      setIsSavingDress(false);
     }
   };
 
@@ -243,11 +252,19 @@ const DetailsPage = () => {
 
   const handleSaveRundown = async () => {
     setIsSavingRundown(true);
-    const result = await updateCustomRundown(username, rundown);
-    if (result.success) {
-      console.log("Rundown saved!");
+    try {
+      console.log("💾 Saving rundown with", rundown.length, "items");
+      const result = await updateCustomRundown(username, rundown);
+      if (result.success) {
+        console.log("✅ Rundown saved!");
+      } else {
+        throw new Error(result.error || "Failed to save rundown");
+      }
+    } catch (error) {
+      console.error("❌ Error saving rundown:", error);
+    } finally {
+      setIsSavingRundown(false);
     }
-    setIsSavingRundown(false);
   };
 
   const handleChecklistToggle = (category, itemId) => {
@@ -264,18 +281,33 @@ const DetailsPage = () => {
     setSaveSuccess(false);
 
     try {
-      if (selectedDressCode) {
-        await updateDressCode(username, selectedDressCode);
-      }
-      await updateCustomRundown(username, rundown);
+      console.log("💾 Saving all data for:", username);
 
+      // Always save dress code if selected
+      if (selectedDressCode) {
+        console.log("💾 Saving dress code:", selectedDressCode);
+        const dressResult = await updateDressCode(username, selectedDressCode);
+        if (!dressResult.success) {
+          throw new Error("Failed to save dress code");
+        }
+      }
+
+      // Always save rundown
+      console.log("💾 Saving rundown with", rundown.length, "items");
+      const rundownResult = await updateCustomRundown(username, rundown);
+      if (!rundownResult.success) {
+        throw new Error("Failed to save rundown");
+      }
+
+      console.log("✅ All data saved successfully!");
       setSaveSuccess(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
       setTimeout(() => {
         setSaveSuccess(false);
       }, 3000);
     } catch (error) {
-      console.error("Error saving data:", error);
+      console.error("❌ Error saving data:", error);
+      alert("Gagal menyimpan data. Coba lagi ya!");
     } finally {
       setIsSavingAll(false);
     }

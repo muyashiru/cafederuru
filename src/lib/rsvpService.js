@@ -206,9 +206,9 @@ export const updateReactionVideo = async (username, videoUrl) => {
 };
 
 /**
- * Save RSVP response to database
- * @param {Object} data - RSVP data
- * @param {string} data.username - Selected username from dropdown
+ * Update RSVP response in database (UPDATE existing entry, not INSERT new)
+ * @param {Object} data - RSVP data to update
+ * @param {string} data.username - Username to update (must exist)
  * @param {Date} data.loginDate - Date when they last met
  * @param {string} data.signatureImage - Base64 signature image
  * @param {string} data.dressCode - Selected dress code color
@@ -287,21 +287,27 @@ export const saveRSVP = async (data) => {
       rsvpData.voice_record = voiceUrl;
     }
 
-    // Insert to Supabase
-    const { data: insertedData, error } = await supabase
+    // UPDATE existing entry (don't insert new)
+    console.log("📝 Updating RSVP for username:", username);
+    console.log("   Data to update:", rsvpData);
+
+    const { data: updatedData, error } = await supabase
       .from("rsvp_responses")
-      .insert([rsvpData])
+      .update(rsvpData)
+      .eq("username", username)
       .select()
       .single();
 
     if (error) {
-      console.error("Supabase error:", error);
+      console.error("❌ Supabase error:", error);
       throw error;
     }
 
+    console.log("✅ RSVP updated successfully:", updatedData);
+
     return {
       success: true,
-      data: insertedData,
+      data: updatedData,
     };
   } catch (error) {
     console.error("Error saving RSVP:", error);
@@ -666,6 +672,177 @@ export const updateMotorChoice = async (
       success: false,
       operation: "failed",
       message: `Failed to update motor choice: ${error.message}`,
+      error: error.message,
+    };
+  }
+};
+
+/**
+ * Create a new RSVP entry with default values
+ * @param {string} username - Username for the RSVP entry
+ * @param {string} loginDate - Login date (format: YYYY-MM-DD)
+ * @returns {Object} Result with success status and created data
+ */
+export const createRSVPEntry = async ({ username, loginDate }) => {
+  try {
+    console.log("🚀 Creating new RSVP entry for:", username);
+    console.log("   Login date:", loginDate);
+
+    // Check if username already exists to prevent duplicates
+    const { data: existingData, error: checkError } = await supabase
+      .from("rsvp_responses")
+      .select("id")
+      .eq("username", username)
+      .single();
+
+    if (checkError && checkError.code !== "PGRST116") {
+      // PGRST116 = no rows returned (which is what we want)
+      throw checkError;
+    }
+
+    if (existingData) {
+      console.log("⚠️ Username already exists:", username);
+      return {
+        success: false,
+        error: `Username "${username}" already exists in RSVP responses`,
+        isDuplicate: true,
+      };
+    }
+
+    // Create new RSVP entry with default values
+    const rsvpData = {
+      username: username,
+      login_date: loginDate,
+      response: "yes", // Default response
+      // Other columns will be NULL:
+      // event_date: null
+      // signature_image: null
+      // dress_code: null
+      // custom_rundown: null
+      // face_image: null
+      // voice_record: null
+      // reaction_video: null
+      // motor_choice: null
+    };
+
+    console.log("📝 RSVP data to insert:", rsvpData);
+
+    // Insert the new entry
+    const { data: insertedData, error: insertError } = await supabase
+      .from("rsvp_responses")
+      .insert([rsvpData])
+      .select();
+
+    if (insertError) {
+      console.error("❌ Insert error:", insertError);
+      throw insertError;
+    }
+
+    console.log("✅ RSVP entry created successfully!");
+    console.log("   Inserted data:", insertedData);
+
+    return {
+      success: true,
+      data: insertedData[0] || insertedData,
+    };
+  } catch (error) {
+    console.error("❌ Error in createRSVPEntry function:", error.message);
+    console.error("   Error type:", error.name);
+    console.error("   Error details:", error);
+
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+export const updateMotorChoiceOnly = async (username, motorChoice) => {
+  try {
+    // Validate required fields
+    if (!username || !motorChoice) {
+      console.error(
+        "❌ Validation failed: username and motorChoice are required",
+      );
+      console.error(
+        "   Received - username:",
+        username,
+        "motorChoice:",
+        motorChoice,
+      );
+      throw new Error("Username and motor choice are required");
+    }
+
+    console.log("🔍 Checking if user exists in database...");
+    console.log(
+      "   Parameters - username:",
+      username,
+      "motorChoice:",
+      motorChoice,
+    );
+
+    // Step 1: Check if username exists
+    const { data: existingUser, error: selectError } = await supabase
+      .from("rsvp_responses")
+      .select("id, username, motor_choice, response, login_date")
+      .eq("username", username)
+      .single();
+
+    // Handle different error codes
+    if (selectError && selectError.code !== "PGRST116") {
+      // PGRST116 means no rows returned (which is NOT expected for this function)
+      console.error("❌ Database query error:", selectError);
+      throw selectError;
+    }
+
+    // Step 2: Check if user was found
+    if (!existingUser) {
+      console.warn("⚠️  User not found in database:", username);
+      console.warn(
+        "   This function only updates existing entries. User does not exist.",
+      );
+
+      return {
+        success: false,
+        error: `User '${username}' not found. Cannot update non-existing entry.`,
+      };
+    }
+
+    // Step 3: User exists - UPDATE motor_choice only
+    console.log("✅ User found in database!");
+    console.log(
+      "   Existing data - ID:",
+      existingUser.id,
+      "Current motor_choice:",
+      existingUser.motor_choice,
+    );
+    console.log("🔄 Updating motor_choice...");
+
+    const { data: updatedData, error: updateError } = await supabase
+      .from("rsvp_responses")
+      .update({ motor_choice: motorChoice })
+      .eq("username", username)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error("❌ Update error:", updateError);
+      throw updateError;
+    }
+
+    console.log("✅ Motor choice updated successfully!");
+    console.log("   Updated data:", updatedData);
+
+    return {
+      success: true,
+      data: updatedData,
+    };
+  } catch (error) {
+    console.error("❌ Error in updateMotorChoiceOnly function:", error.message);
+    console.error("   Error type:", error.name);
+    console.error("   Error details:", error);
+
+    return {
+      success: false,
       error: error.message,
     };
   }

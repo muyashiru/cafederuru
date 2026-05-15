@@ -5,6 +5,7 @@ import { Listbox } from "@headlessui/react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./LoginPage.css";
+import { createRSVPEntry } from "../lib/rsvpService";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isShaking, setIsShaking] = useState(false);
 
+  // This is the date user should remember (last time you kissed)
   const correctDate = new Date("2026-05-01");
 
   const usernameOptions = [
@@ -48,7 +50,7 @@ const LoginPage = () => {
     { value: "nasywa30", label: "Kangen seng :(" },
   ];
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMessage("");
 
@@ -69,6 +71,22 @@ const LoginPage = () => {
 
     if (selectedDateOnly.getTime() !== correctDateOnly.getTime()) {
       setErrorMessage("Hmm... coba inget-inget lagi deh 🤔");
+      triggerShake();
+      return;
+    }
+
+    // Create RSVP entry saat login
+    // Use today's date as login_date (when they're filling this form)
+    const todayDate = new Date().toISOString();
+    console.log("📝 Creating RSVP entry for:", selectedUsername?.label);
+    console.log("   Login date (today):", todayDate);
+    const result = await createRSVPEntry({
+      username: selectedUsername?.label,
+      loginDate: todayDate,
+    });
+
+    if (!result.success) {
+      setErrorMessage("Gagal menyimpan data. Coba lagi ya!");
       triggerShake();
       return;
     }

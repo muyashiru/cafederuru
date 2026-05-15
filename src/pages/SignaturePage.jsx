@@ -394,8 +394,8 @@ const SignaturePage = () => {
                 Cebelapa Kesel Kamyu?
               </h1>
               <p className="font-body text-xs sm:text-sm text-gray-600">
-                Luapin Beban Kamu di sini! Teriak/Misuh di depan HP sampai
-                bar-nya merah 80%! 🤬
+                Keluarin kesel Kamu di sini! Teriak/Misuh - misuh sampai bar-nya
+                merah 80%! 🤬
               </p>
             </div>
 
